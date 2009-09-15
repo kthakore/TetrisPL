@@ -13,8 +13,12 @@ sub new { my $class = shift; my $self = {}; bless $self, $class;
 	  $self->name("Generic Event"); return $self  }
 sub name { my $self = shift; $self->{name} = shift if(@_); return $self->{name}}
 
+package Event::Tick;
+sub new { my $class = shift; my $self = {}; bless $self, $class; 
+	  $self->name("CPU Tick Event"); return $self  }
+
 package main;
 
-my $event =Event->new;
+my $event = Event::Tick->new;
 print $event->name
 

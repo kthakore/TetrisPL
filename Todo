@@ -1,5 +1,7 @@
 TODO list for Perl module SDL::Tutorial::Tetris
 
-- Nothing yet
+- Make MVC structure
+- Use SDL events
+- Use SDL 
 
 

@@ -1,15 +1,52 @@
-pod2text SDL::Tutorial::Tetris.pm > README
+  sample_function
+     Usage     : How to use this function/method
+     Purpose   : What it does
+     Returns   : What it returns
+     Argument  : What it wants to know
+     Throws    : Exceptions and other anomolies
+     Comment   : This is a sample subroutine header.
+               : It is polite to include more pod and fewer comments.
 
-If this is still here it means the programmer was too lazy to create the readme file.
+    See Also :
 
-You can create it now by using the command shown above from this directory.
+NAME
+    SDL::Tutorial::Tetris - Tutorial using SDL and MVC design to make Tetris
 
-At the very least you should be able to use this set of instructions
-to install the module...
+SYNOPSIS
+      use SDL::Tutorial::Tetris;
+      
+  run_Tetris();
 
-perl Build.PL
-./Build
-./Build test
-./Build install
+DESCRIPTION
+    Code to show MVC style game development with SDL Perl. If you do not
+    know what Tetris is ... I am sorry. Try wikipedia. This tutorial is
+    based of <sjbrown's Writing Games Tutorial>
 
-If you are on a windows box you should use 'nmake' rather than 'make'.
+USAGE
+    There is a script installed with this in you PATH. Just type: perl
+    Tetris.sdlpl
+
+BUGS
+    None yet.
+
+SUPPORT
+    Ask for help on #sdl on irc.perl.org. Try the mailing list
+    sdl-devel\@perl.org.
+
+AUTHOR
+        Kartik Thakore
+        CPAN ID: KTHAKORE
+        none
+        kthakore@CPAN.org
+        http://yapgh.blogspot.com
+
+COPYRIGHT
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+    The full text of the license can be found in the LICENSE file included
+    with this module.
+
+SEE ALSO
+    perl(1) SDL(2).
+

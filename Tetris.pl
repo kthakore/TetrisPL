@@ -1,15 +1,16 @@
 use strict;
 use warnings;
-
+use Carp;
+ 
 use Readonly;
-Readonly my $DIRECTION_UP    => 0;  #rotates blocks
-Readonly my $DIRECTION_DOWN  => 1;  #rotates blocks other way
-Readonly my $DIRECTION_LEFT  => 2;  # move left
-Readonly my $DIRECTION_RIGHT => 3;  # move right
+Readonly my $DIRECTION_UP => 0; #rotates blocks
+Readonly my $DIRECTION_DOWN => 1; #rotates blocks other way
+Readonly my $DIRECTION_LEFT => 2; # move left
+Readonly my $DIRECTION_RIGHT => 3; # move right
                                                                                                     
 #Event Super Class
 package Event;
-use Class::XSAccessor  accessors => { name => 'name', };   
+use Class::XSAccessor accessors => { name => 'name', };
 sub new {
  my $class = shift;
  my $self = {};
@@ -20,83 +21,165 @@ sub new {
                                                                                                     
 package Event::Tick;
 use base 'Event';
-sub new { 
+sub new {
   my $class = shift;
-  my $self = $class->SUPER::new( name => 'CPU Tick Event' );
+  my $self = $class->SUPER::new( );
+  $self->name( 'CPU Tick Event' );
   return $self;
 }
                                                                                                     
 package Event::Quit;
 use base 'Event';
-sub new { 
+sub new {
   my $class = shift;
-  my $self = $class->SUPER::new( name => 'Program Quit Event' );
+  my $self = $class->SUPER::new();
+  $self->name( 'Program Close Event');
   return $self;
 }
-
+ 
                                                                                                     
 package Event::GridBuilt; #Tetris has a grid
 use base 'Event';
-use Class::XSAccessor   accessors => {  grid => 'grid',  };
+use Class::XSAccessor accessors => { grid => 'grid', };
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new( );
   $self->name( 'Grid Built Event' );
   return $self;
 }
-
-package Event::GameStart; 
+ 
+package Event::GameStart;
 use base 'Event';
-use Class::XSAccessor  accessors => {  game => 'game',  };
+use Class::XSAccessor accessors => { game => 'game', };
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new();
   $self->name( 'Game Start Event' );
   return $self;
 }
-
-package Request::CharactorMove; 
+ 
+package Request::CharactorMove;
 use base 'Event';
-use Class::XSAccessor  accessors => {  direction => 'direction',  };
+use Class::XSAccessor accessors => { direction => 'direction', };
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new();
   $self->name( 'Charactor Move Request' );
   return $self;
 }
-
-package Event::CharactorPlace; 
+ 
+package Event::CharactorPlace;
 use base 'Event';
-use Class::XSAccessor  accessors => {  charactor => 'charactor',  };
+use Class::XSAccessor accessors => { charactor => 'charactor', };
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new();
   $self->name( 'Charactor Place Event' );
   return $self;
 }
-
-
-package Event::CharactorMove; 
+ 
+ 
+package Event::CharactorMove;
 use base 'Event';
-use Class::XSAccessor  accessors => {  charactor => 'charactor',  };
+use Class::XSAccessor accessors => { charactor => 'charactor', };
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new();
   $self->name( 'Charactor Move Event' );
   return $self;
 }
-
+ 
 #---------------------------
 package Event::Manager;
-#Coordinates MVC
+ 
 sub new {
   my $class = shift;
-  my $self = {};
+  my $self = {
+    listeners => {},
+    evt_queue => [],
+  };
+  bless $self, $class;
   return $self
  }
+ 
+sub listeners :lvalue { return shift->{listeners} }
+sub evt_queue :lvalue { return shift->{evt_queue} }
+#
+# so now you can access them like:
+# $object->listeners->{foo} = 'bar';
+# my $listener = $object->listeners->{foo}; # $listener gets 'bar'
+#
+# $object->evt_queue->[0] = 'baz';
+# I think you can even do:
+# push @{$object->evt_queue}, 'bla';
+# my $event = $objetc->evt_queue->[0]; # $event gets 'baz'
+ 
+ 
+# from the code below I see you don't want the user
+# to interact directly with ->listeners, or do you?
+sub reg_listener{
+my ($self, $listener) = (@_);
+        $self->listeners->{$listener} = 1
+            if defined $listener;
 
+ 
+return $self->listeners->{$listener};
+}
+ 
+sub un_reg_listener{
+  my ($self, $listener) = (@_);
+        
+        if (defined $listener) {
+            # removes from hash and returns
+            # the removed value
+            return delete $self->listeners->{$listener}
+        }
+        else {
+            return;
+        }
+}
+ 
+sub post
+{
+my $self = shift;
+my $event = shift if(@_) or die "Post needs a TickEvent";
+ 
+        die "Post needs a TickEvent as parameter"
+            unless $event->isa('Event::Tick');
+		foreach my $listener ( keys %{$self->listeners} ){
+	             $listener->notify();
+	    }
+
+ 
+}
+ 
+package Controller::Keyboard;
+use Class::XSAccessor accessors => { event => 'event'};
+use Data::Dumper;
+
+sub new{
+  my $class = shift;
+
+  my $self = {};
+  bless $self, $class;
+  #print Dumper $_[0];
+  $self->evt_manager( $_[0] ) if ( $_[0]->isa('Event::Manager')  );
+  $self->evt_manager->reg_listener($self); # this should be after we are sure we have a Event::Manager
+
+  return $self;
+
+}
+
+sub notify
+{
+	print "This Should Print";
+}
+
+sub evt_manager :lvalue { return shift->{evt_manager}} 
 
 package main; #On the go testing
 
-my $event = Event::GridBuilt->new();
-print $event->name
+my $gEM = Event::Manager->new();
+my $kBC = Controller::Keyboard->new($gEM);
+my $tEv = Event::Tick->new();
+$gEM->post($tEv);

@@ -152,6 +152,7 @@ my $event = shift if(@_) or die "Post needs a TickEvent";
  
 package Controller::Keyboard;
 use Class::XSAccessor accessors => { event => 'event', evt_manager =>'evt_manager'};
+use SDL;
 use SDL::Event;
 
 sub new{
@@ -177,16 +178,39 @@ sub notify
 		die 'expecting Event::Tick';
 	}
 	
-	my $self->event(SDL::Event->new()); 
+	$self->event(SDL::Event->new()); 
+	$self->event->pump;
+	$self->event->poll;
+	exit if $self->event->type == SDL_QUIT();
 
 }
 
 package main; #On the go testing
+ 
+
+use SDL;
+use SDL::App;
+# after launching this script press the keyboard and whach the console
+
+# this script is using the internal event loop of SDL but as far as I can understand
+# this is not a recommended practice.
+
+my $window = SDL::App->new(
+	-width => 640,
+	-height => 480,
+	-depth => 16,
+	-title => 'SDL Demo',
+);
+
+
 
 my $evManager = Event::Manager->new();
 my $keybd = Controller::Keyboard->new($evManager);
 my $tick = Event::Tick->new();
-evManager->post($tick);
+$evManager->post($tick);
+
+
+
 #my $spiner = Controller::CPUSpinnerController($evManager);
 #my $gameView = View::Game->new( $evManager );
 #my $game = Game( $evManager);

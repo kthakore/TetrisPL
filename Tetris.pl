@@ -176,6 +176,8 @@ sub notify
 	{
 		die 'expecting Event::Tick';
 	}
+	
+	my $self->event(SDL::Event->new()); 
 
 }
 
@@ -184,7 +186,7 @@ package main; #On the go testing
 my $evManager = Event::Manager->new();
 my $keybd = Controller::Keyboard->new($evManager);
 my $tick = Event::Tick->new();
-$evManager->post($tick);
+evManager->post($tick);
 #my $spiner = Controller::CPUSpinnerController($evManager);
 #my $gameView = View::Game->new( $evManager );
 #my $game = Game( $evManager);

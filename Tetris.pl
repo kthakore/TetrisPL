@@ -280,6 +280,9 @@ sub init
 package View::Game;
 use Class::XSAccessor accessors => { evt_manager =>'evt_manager'};
 use Scalar::Util qw(weaken);
+use SDL;
+use SDL::App;
+
 sub new{
   my $class = shift;
   my $self = {};
@@ -294,6 +297,12 @@ if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] 
 sub init 
 {
 	my $self = shift;
+	$self->{window} = SDL::App->new(
+	-width => 640,
+	-height => 480,
+	-depth => 16,
+	-title => 'SDL Demo',
+	);
 }
 
 sub notify
@@ -382,22 +391,6 @@ sub notify
 
 
 package main; #On the go testing
-use SDL;
-use SDL::App;
-# after launching this script press the keyboard and whach the console
-
-# this script is using the internal event loop of SDL but as far as I can understand
-# this is not a recommended practice.
-
-my $window = SDL::App->new(
-	-width => 640,
-	-height => 480,
-	-depth => 16,
-	-title => 'SDL Demo',
-);
-
-
-
 my $evManager = Event::Manager->new();
 my $keybd = Controller::Keyboard->new($evManager);
 my $spinner = Controller::CPUSpinner->new($evManager);

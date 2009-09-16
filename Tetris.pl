@@ -185,7 +185,7 @@ sub notify
 	$self->event->pump;
 	$self->event->poll;
 	exit if $self->event->type == SDL_QUIT();
-	exit if $self->event->type == SDL_KEYDOWN() && $self->event->key_name == 'escape';
+	exit if $self->event->type == SDL_KEYDOWN() && $self->event->key_name =~ 'escape';
 
 }
 

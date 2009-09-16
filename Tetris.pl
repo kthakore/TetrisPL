@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Carp;
- 
+use Data::Dumper; 
 use Readonly;
 Readonly my $DIRECTION_UP => 0; #rotates blocks
 Readonly my $DIRECTION_DOWN => 1; #rotates blocks other way
@@ -91,7 +91,7 @@ sub new {
  
 #---------------------------
 package Event::Manager;
-use Controller::Keyboard; 
+use Data::Dumper;
 sub new {
   my $class = shift;
   my $self = {
@@ -118,21 +118,18 @@ sub evt_queue :lvalue { return shift->{evt_queue} }
 # from the code below I see you don't want the user
 # to interact directly with ->listeners, or do you?
 sub reg_listener{
-my ($self, $listener) = (@_);
-        $self->listeners->{$listener} = 1
-            if defined $listener;
+my ($self) = shift; 
+     $self->listeners->{$_[0]} = $_[0]
+	          if defined $_[0];
 
- 
-return $self->listeners->{$listener};
+return $self->listeners->{$_[0]};
 }
  
 sub un_reg_listener{
   my ($self, $listener) = (@_);
         
         if (defined $listener) {
-            # removes from hash and returns
-            # the removed value
-            return delete $self->listeners->{$listener}
+            return delete $self->listeners->{\$listener}
         }
         else {
             return;
@@ -146,8 +143,8 @@ my $event = shift if(@_) or die "Post needs a TickEvent";
  
         die "Post needs a TickEvent as parameter"
             unless $event->isa('Event::Tick');
-		foreach my $listener ( keys %{$self->listeners} ){
-	             $listener->notify();
+		while( my($key, $listener) = %{$self->listeners} ){
+			  $listener->notify($event);
 	    }
 
  
@@ -155,16 +152,13 @@ my $event = shift if(@_) or die "Post needs a TickEvent";
  
 package Controller::Keyboard;
 use Class::XSAccessor accessors => { event => 'event', evt_manager =>'evt_manager'};
-use Data::Dumper;
+use SDL::Event;
 
 sub new{
   my $class = shift;
-
   my $self = {};
   bless $self, $class;
-  #print Dumper $_[0];
-  $self->evt_manager( $_[0] ) if ( $_[0]->isa('Event::Manager')  );
-  #ewwww
+ if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
  $self->evt_manager->reg_listener($self); 
  return $self;
 
@@ -172,7 +166,17 @@ sub new{
 
 sub notify
 {
-	print "This Should Print";
+#	print "This Should Print";
+	my $self = shift;
+	if( defined $_[0] && $_[0]->isa('Event::Tick') )
+	{
+		my $tick_event = $_[0]
+	}
+	else
+	{
+		die 'expecting Event::Tick';
+	}
+
 }
 
 package main; #On the go testing

@@ -7,7 +7,9 @@ Readonly my $DIRECTION_UP => 0; #rotates blocks
 Readonly my $DIRECTION_DOWN => 1; #rotates blocks other way
 Readonly my $DIRECTION_LEFT => 2; # move left
 Readonly my $DIRECTION_RIGHT => 3; # move right
-                                                                                                    
+
+our ($EDEBUG, $KEYDEBUG) = @ARGV; #Event and key debug
+
 #Event Super Class
 package Event;
 use Class::XSAccessor accessors => { name => 'name', };
@@ -18,7 +20,7 @@ sub new {
  $self->name("Generic Event");
  return $self
 }
-                                                                                                    
+
 package Event::Tick;
 use base 'Event';
 sub new {
@@ -27,7 +29,7 @@ sub new {
   $self->name( 'CPU Tick Event' );
   return $self;
 }
-                                                                                                    
+
 package Event::Quit;
 use base 'Event';
 sub new {
@@ -37,7 +39,7 @@ sub new {
   return $self;
 }
  
-                                                                                                    
+
 package Event::GridBuilt; #Tetris has a grid
 use base 'Event';
 use Class::XSAccessor accessors => { grid => 'grid', };
@@ -140,10 +142,13 @@ sub post
 {
 my $self = shift;
 my $event = shift if(@_) or die "Post needs a TickEvent";
- 
+		print 'Event'.$event->name()."notified\n" if $EDEBUG;
         die "Post needs a TickEvent as parameter"
-            unless $event->isa('Event::Tick');
-		while( my($key, $listener) = %{$self->listeners} ){
+            unless $event->isa('Event');
+		
+
+		foreach my $listener (values %{$self->listeners} )
+		{
 			  $listener->notify($event);
 	    }
 
@@ -155,44 +160,163 @@ use Class::XSAccessor accessors => { event => 'event', evt_manager =>'evt_manage
 use SDL;
 use SDL::Event;
 use Scalar::Util qw(weaken);
-use Data::Dumper;
 sub new{
   my $class = shift;
   my $self = {};
   bless $self, $class;
+
  if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
  $self->evt_manager->reg_listener($self); 
  my $weak_self = weaken $self;
  #$self->evt_manager->reg_listener($self); 
  #TODO weaken so it works
  return $self;
-
 }
 
 sub notify
 {
-#	print "This Should Print";
+	print "Notify in C::KB \n" if $EDEBUG;
 	my $self = shift;
+	
 	if( defined $_[0] && $_[0]->isa('Event::Tick') )
 	{
-		my $tick_event = $_[0]
+		#if we got a tick event that means we are starting 
+		#a new iteration of game loop
+		#so we can check input now
+		my $event_to_process = undef;
+		$self->event(SDL::Event->new()); 
+		$self->event->pump; #get events from SDL queue
+		$self->event->poll; #get the first one
+		my $event_type = $self->event->type;
+		$event_to_process = Event::Quit->new() if $event_type == SDL_QUIT();
+		if ($event_type == SDL_KEYDOWN())
+		{   
+			
+			my $key = $self->event->key_name;
+			print $key." pressed \n" if $KEYDEBUG;
+			#This process the only keys we care about right now
+			#later on we will add more stuff
+			$event_to_process = Event::Quit->new() 
+					if $key =~ 'escape';			
+			$event_to_process = Request::CharactorMove->new($DIRECTION_UP) 
+					if $key =~ 'up';
+			$event_to_process = Request::CharactorMove->new($DIRECTION_DOWN) 
+					if $key =~ 'down';
+			$event_to_process = Request::CharactorMove->new($DIRECTION_LEFT) 
+					if $key =~ 'left';
+			$event_to_process = Request::CharactorMove->new($DIRECTION_RIGHT) 
+					if $key =~ 'right';
+			}
+		#lets send the new events to be process back the event manager
+		$self->evt_manager->post($event_to_process) if defined $event_to_process;
+		
+		
 	}
-	else
-	{
-		die 'expecting Event::Tick';
-	}
-	
-	$self->event(SDL::Event->new()); 
-	$self->event->pump;
-	$self->event->poll;
-	exit if $self->event->type == SDL_QUIT();
-	exit if $self->event->type == SDL_KEYDOWN() && $self->event->key_name =~ 'escape';
-
+ 	#if we did not have a tick event then some other controller needs to do
+ 	#something so game state is still beign process we cannot have new input 
+	#now	
 }
 
-package main; #On the go testing
- 
+package Controller::CPUSpinner;
+use Class::XSAccessor accessors => { evt_manager =>'evt_manager'};
+use Scalar::Util qw(weaken);
+sub new{
+  my $class = shift;
+  my $self = {};
+  bless $self, $class;
+if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
+ $self->evt_manager->reg_listener($self); 
+ my $weak_self = weaken $self;
+ $self->{keep_going} = 1;
+ return $self;
+}
 
+sub run
+{
+	my $self = shift;
+	while ($self->{keep_going} == 1 )
+	{
+		my $tick = Event::Tick->new();
+		$self->evt_manager->post($tick);
+	}
+}
+
+sub notify
+{
+	print "Notify in CPU Spinner \n" if $EDEBUG;
+	my $self = shift;
+	
+	if( defined $_[0] && $_[0]->isa('Event::Quit') )
+	{
+		print "Stopping to pump ticks \n" if $EDEBUG;
+		#if we got a quit event that means we can stop running the game
+		$self->{keep_going} = 0;
+	}
+ 	#if we did not have a tick event then some other controller needs to do
+ 	#something so game state is still beign process we cannot have new input 
+	#now	
+}
+
+##################################################
+#Here comes the code for the actual game objects #
+##################################################
+
+package Sprite::Square;
+use base 'SDL::Surface';
+sub new
+{
+   my $class = shift;
+   my $self = {};
+   bless $self, $class;
+   $self->init();
+}
+
+sub init
+{
+	my $self = shift;
+	
+}
+
+###########################
+#Here is the Tetris logic #
+###########################
+package Controller::Game;
+use Class::XSAccessor accessors => { evt_manager =>'evt_manager'};
+use Readonly;
+Readonly my $STATE_PREPARING => 0; 
+Readonly my $STATE_RUNNING => 1; 
+Readonly my $STATE_PAUSED => 2; 
+sub new{
+  my $class = shift;
+  my $self = {};
+  bless $self, $class;
+if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
+ $self->evt_manager->reg_listener($self); 
+ my $weak_self = weaken $self;
+ $self->{state} = $STATE_PREPARING;
+ #$self->{player} =;
+ #$self->{window} =;
+ #$self->{block_queue} =;
+ return $self;
+}
+sub notify
+{
+	print "Notify in GAME \n" if $EDEBUG;
+	my $self = shift;
+	
+	if( defined $_[0] && $_[0]->isa('Event::Quit') )
+	{
+		print "Stopping to pump ticks \n" if $EDEBUG;
+		#if we got a quit event that means we can stop running the game
+		$self->{keep_going} = 0;
+	}
+ 	#if we did not have a tick event then some other controller needs to do
+ 	#something so game state is still beign process we cannot have new input 
+	#now	
+}
+
+
+package main; #On the go testing
 use SDL;
 use SDL::App;
 # after launching this script press the keyboard and whach the console
@@ -211,13 +335,8 @@ my $window = SDL::App->new(
 
 my $evManager = Event::Manager->new();
 my $keybd = Controller::Keyboard->new($evManager);
-my $tick = Event::Tick->new();
-$evManager->post($tick);
-
-
-
-#my $spiner = Controller::CPUSpinnerController($evManager);
+my $spinner = Controller::CPUSpinner->new($evManager);
 #my $gameView = View::Game->new( $evManager );
 #my $game = Game( $evManager);
 
-#$spinner->Run();
+$spinner->run();

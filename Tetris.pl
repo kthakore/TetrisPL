@@ -8,7 +8,7 @@ Readonly my $DIRECTION_DOWN => 1; #rotates blocks other way
 Readonly my $DIRECTION_LEFT => 2; # move left
 Readonly my $DIRECTION_RIGHT => 3; # move right
 
-our ($EDEBUG, $KEYDEBUG) = @ARGV; #Event and key debug
+our ($EDEBUG, $KEYDEBUG, $GDEBUG) = @ARGV; #Event and key debug
 
 #Event Super Class
 package Event;
@@ -277,11 +277,61 @@ sub init
 	
 }
 
+package View::Game;
+use Class::XSAccessor accessors => { evt_manager =>'evt_manager'};
+use Scalar::Util qw(weaken);
+sub new{
+  my $class = shift;
+  my $self = {};
+  bless $self, $class;
+if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
+ $self->evt_manager->reg_listener($self); 
+ my $weak_self = weaken $self;
+ $self->{keep_going} = 1;
+ return $self;
+}
+
+sub init 
+{
+	my $self = shift;
+}
+
+sub notify
+{
+	print "Notify in View Game \n" if $EDEBUG;
+	my $self = shift;
+	
+	if( defined $_[0] ) 
+	{
+		if($_[0]->isa('Event::Tick')) 
+		{
+		print "Update Game View \n" if $GDEBUG;
+		#if we got a quit event that means we can stop running the game
+		}
+		if($_[0]->isa('Event::GridBuilt'))
+		{
+		print "Showing Grid \n" if $GDEBUG;
+		}
+		if($_[0]->isa('Event::CharactorPlace'))
+		{
+		print "Placing charactor sprite \n" if $GDEBUG;
+		}
+		if($_[0]->isa('Event::CharactorMove'))
+		{
+		print "Moving chractor sprite \n" if $GDEBUG;
+		}
+	}
+ 	#if we did not have a tick event then some other controller needs to do
+ 	#something so game state is still beign process we cannot have new input 
+	#now	
+}
+
 ###########################
 #Here is the Tetris logic #
 ###########################
 package Controller::Game;
 use Class::XSAccessor accessors => { evt_manager =>'evt_manager'};
+use Scalar::Util qw/weaken/;
 use Readonly;
 Readonly my $STATE_PREPARING => 0; 
 Readonly my $STATE_RUNNING => 1; 
@@ -294,21 +344,36 @@ if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] 
  $self->evt_manager->reg_listener($self); 
  my $weak_self = weaken $self;
  $self->{state} = $STATE_PREPARING;
+ print "Game PREPARING ... \n" if $GDEBUG;
  #$self->{player} =;
  #$self->{window} =;
  #$self->{block_queue} =;
  return $self;
 }
+
+sub start
+{
+	my $self = shift;
+	#$self->{window}->build();
+	$self->{state} = $STATE_RUNNING;
+	print "Game RUNNING \n" if $GDEBUG;
+	my $event = Event::GameStart->new( $self );
+	$self->evt_manager->post($event);
+}
+
 sub notify
 {
 	print "Notify in GAME \n" if $EDEBUG;
 	my $self = shift;
 	
-	if( defined $_[0] && $_[0]->isa('Event::Quit') )
+	if( defined $_[0] && $_[0]->isa('Event') )
 	{
-		print "Stopping to pump ticks \n" if $EDEBUG;
+		if($self->{state} == $STATE_PREPARING)
+		{
+		print "Event ".$_[0]->name()."caught to start Game  \n" if $GDEBUG;
 		#if we got a quit event that means we can stop running the game
-		$self->{keep_going} = 0;
+		$self->start();
+		}
 	}
  	#if we did not have a tick event then some other controller needs to do
  	#something so game state is still beign process we cannot have new input 
@@ -336,7 +401,7 @@ my $window = SDL::App->new(
 my $evManager = Event::Manager->new();
 my $keybd = Controller::Keyboard->new($evManager);
 my $spinner = Controller::CPUSpinner->new($evManager);
-#my $gameView = View::Game->new( $evManager );
-#my $game = Game( $evManager);
+my $gameView = View::Game->new( $evManager );
+my $game = Controller::Game->new( $evManager);
 
 $spinner->run();

@@ -154,14 +154,16 @@ package Controller::Keyboard;
 use Class::XSAccessor accessors => { event => 'event', evt_manager =>'evt_manager'};
 use SDL;
 use SDL::Event;
-
+use Scalar::Util qw(weaken);
 sub new{
   my $class = shift;
   my $self = {};
   bless $self, $class;
  if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
- my $weak_self = weaken $self;
- $self->evt_manager->reg_listener($weak_self); 
+ #my $weak_self = weaken $self;
+# $self->evt_manager->reg_listener($weak_self); 
+ $self->evt_manager->reg_listener($self); 
+ #TODO weaken so it works
  return $self;
 
 }

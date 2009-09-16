@@ -160,7 +160,8 @@ sub new{
   my $self = {};
   bless $self, $class;
  if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
- $self->evt_manager->reg_listener($self); 
+ my $weak_self = weaken $self;
+ $self->evt_manager->reg_listener($weak_self); 
  return $self;
 
 }

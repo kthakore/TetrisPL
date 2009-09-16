@@ -91,7 +91,7 @@ sub new {
  
 #---------------------------
 package Event::Manager;
- 
+use Controller::Keyboard; 
 sub new {
   my $class = shift;
   my $self = {

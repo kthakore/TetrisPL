@@ -290,7 +290,7 @@ sub new{
 if ( defined $_[0] && $_[0]->isa('Event::Manager')) { $self->evt_manager( $_[0] ) } else { die 'Expects an Event::Manager' };
  $self->evt_manager->reg_listener($self); 
  my $weak_self = weaken $self;
- $self->{keep_going} = 1;
+ $self->init();
  return $self;
 }
 

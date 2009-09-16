@@ -154,7 +154,7 @@ my $event = shift if(@_) or die "Post needs a TickEvent";
 }
  
 package Controller::Keyboard;
-use Class::XSAccessor accessors => { event => 'event'};
+use Class::XSAccessor accessors => { event => 'event', evt_manager =>'evt_manager'};
 use Data::Dumper;
 
 sub new{
@@ -164,9 +164,9 @@ sub new{
   bless $self, $class;
   #print Dumper $_[0];
   $self->evt_manager( $_[0] ) if ( $_[0]->isa('Event::Manager')  );
-  $self->evt_manager->reg_listener($self); # this should be after we are sure we have a Event::Manager
-
-  return $self;
+  #ewwww
+ $self->evt_manager->reg_listener($self); 
+ return $self;
 
 }
 
@@ -175,11 +175,14 @@ sub notify
 	print "This Should Print";
 }
 
-sub evt_manager :lvalue { return shift->{evt_manager}} 
-
 package main; #On the go testing
 
-my $gEM = Event::Manager->new();
-my $kBC = Controller::Keyboard->new($gEM);
-my $tEv = Event::Tick->new();
-$gEM->post($tEv);
+my $evManager = Event::Manager->new();
+my $keybd = Controller::Keyboard->new($evManager);
+my $tick = Event::Tick->new();
+$evManager->post($tick);
+#my $spiner = Controller::CPUSpinnerController($evManager);
+#my $gameView = View::Game->new( $evManager );
+#my $game = Game( $evManager);
+
+#$spinner->Run();

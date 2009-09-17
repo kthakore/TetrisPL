@@ -2,13 +2,13 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Readonly;
-Readonly my $ROTATE_C   => 0;         # rotates blocks ClockWise
-Readonly my $ROTATE_CC   => 1;        # rotates blocks CounterClockWise
+Readonly my $ROTATE_C        => 0;    # rotates blocks ClockWise
+Readonly my $ROTATE_CC       => 1;    # rotates blocks CounterClockWise
 Readonly my $DIRECTION_DOWN  => 2;    # Drops the block
 Readonly my $DIRECTION_LEFT  => 3;    # move left
 Readonly my $DIRECTION_RIGHT => 4;    # move right
 
-our ( $EDEBUG, $KEYDEBUG, $GDEBUG, $FPS ) = @ARGV; 
+our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 
 
 our $frame_rate = 0;
@@ -17,7 +17,7 @@ our $time       = time;
 
 #Event Super Class
 package Event;
-use Class::XSAccessor accessors => { name => 'name', };
+use Class::XSAccessor accessors => {name => 'name',};
 
 sub new {
     my $class = shift;
@@ -49,7 +49,7 @@ sub new {
 
 package Event::GridBuilt;    #Tetris has a grid
 use base 'Event';
-use Class::XSAccessor accessors => { grid => 'grid', };
+use Class::XSAccessor accessors => {grid => 'grid',};
 
 sub new {
     my $class = shift;
@@ -60,7 +60,7 @@ sub new {
 
 package Event::GameStart;
 use base 'Event';
-use Class::XSAccessor accessors => { game => 'game', };
+use Class::XSAccessor accessors => {game => 'game',};
 
 sub new {
     my $class = shift;
@@ -71,7 +71,7 @@ sub new {
 
 package Request::CharactorMove;
 use base 'Event';
-use Class::XSAccessor accessors => { direction => 'direction', };
+use Class::XSAccessor accessors => {direction => 'direction',};
 
 sub new {
     my $class = shift;
@@ -82,7 +82,7 @@ sub new {
 
 package Event::CharactorPlace;
 use base 'Event';
-use Class::XSAccessor accessors => { charactor => 'charactor', };
+use Class::XSAccessor accessors => {charactor => 'charactor',};
 
 sub new {
     my $class = shift;
@@ -93,7 +93,7 @@ sub new {
 
 package Event::CharactorMove;
 use base 'Event';
-use Class::XSAccessor accessors => { charactor => 'charactor', };
+use Class::XSAccessor accessors => {charactor => 'charactor',};
 
 sub new {
     my $class = shift;
@@ -136,7 +136,7 @@ sub evt_queue : lvalue {
 # from the code below I see you don't want the user
 # to interact directly with ->listeners, or do you?
 sub reg_listener {
-    my ( $self, $listener ) = (@_);
+    my ($self, $listener) = (@_);
     $self->listeners->{$listener} = $listener
       if defined $listener;
 
@@ -144,10 +144,10 @@ sub reg_listener {
 }
 
 sub un_reg_listener {
-    my ( $self, $listener ) = (@_);
+    my ($self, $listener) = (@_);
 
-    if ( defined $listener ) {
-        return delete $self->listeners->{ \$listener };
+    if (defined $listener) {
+        return delete $self->listeners->{\$listener};
     }
     else {
         return;
@@ -160,25 +160,25 @@ sub post {
     print 'Event' . $event->name . "notified\n" if $EDEBUG;
     die "Post needs a Event as parameter"
       unless $event->isa('Event');
-	#print 'Event' . $event->name ." called \n" if (!$event->isa('Event::Tick') && $EFDEBUG);
 
-    foreach my $listener ( values %{ $self->listeners } ) {
+#print 'Event' . $event->name ." called \n" if (!$event->isa('Event::Tick') && $EFDEBUG);
+
+    foreach my $listener (values %{$self->listeners}) {
         $listener->notify($event);
     }
 
-	
 
 }
 
 package Controller::Keyboard;
 use Class::XSAccessor accessors =>
-  { event => 'event', evt_manager => 'evt_manager' };
+  {event => 'event', evt_manager => 'evt_manager'};
 use SDL;
 use SDL::Event;
 use Scalar::Util qw(weaken);
 
 sub new {
-    my ( $class, $event ) = (@_);
+    my ($class, $event) = (@_);
     my $self = {};
     bless $self, $class;
 
@@ -195,20 +195,20 @@ sub new {
 
 sub notify {
     print "Notify in C::KB \n" if $EDEBUG;
-    my ( $self, $event ) = (@_);
+    my ($self, $event) = (@_);
 
-    if ( defined $event and $event->isa('Event::Tick') ) {
+    if (defined $event and $event->isa('Event::Tick')) {
 
         #if we got a tick event that means we are starting
         #a new iteration of game loop
         #so we can check input now
         my $event_to_process = undef;
-        $self->event( SDL::Event->new );
+        $self->event(SDL::Event->new);
         $self->event->pump;    #get events from SDL queue
         $self->event->poll;    #get the first one
         my $event_type = $self->event->type;
         $event_to_process = Event::Quit->new if $event_type == SDL_QUIT;
-        if ( $event_type == SDL_KEYDOWN ) {
+        if ($event_type == SDL_KEYDOWN) {
 
             my $key = $self->event->key_name;
             print $key. " pressed \n" if $KEYDEBUG;
@@ -221,7 +221,7 @@ sub notify {
               if $key =~ 'up';
             $event_to_process = Request::CharactorMove->new($ROTATE_CC)
               if $key =~ 'space';
-			$event_to_process = Request::CharactorMove->new($DIRECTION_DOWN)
+            $event_to_process = Request::CharactorMove->new($DIRECTION_DOWN)
               if $key =~ 'down';
             $event_to_process = Request::CharactorMove->new($DIRECTION_LEFT)
               if $key =~ 'left';
@@ -241,11 +241,11 @@ sub notify {
 }
 
 package Controller::CPUSpinner;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager' };
+use Class::XSAccessor accessors => {evt_manager => 'evt_manager'};
 use Scalar::Util qw(weaken);
 
 sub new {
-    my ( $class, $event ) = (@_);
+    my ($class, $event) = (@_);
     my $self = {};
     bless $self, $class;
 
@@ -262,7 +262,7 @@ sub new {
 
 sub run {
     my $self = shift;
-    while ( $self->{keep_going} == 1 ) {
+    while ($self->{keep_going} == 1) {
         my $tick = Event::Tick->new;
         $self->evt_manager->post($tick);
     }
@@ -270,9 +270,9 @@ sub run {
 
 sub notify {
     print "Notify in CPU Spinner \n" if $EDEBUG;
-    my ( $self, $event ) = (@_);
+    my ($self, $event) = (@_);
 
-    if ( defined $event && $event->isa('Event::Quit') ) {
+    if (defined $event && $event->isa('Event::Quit')) {
         print "Stopping to pump ticks \n" if $EDEBUG;
 
         #if we got a quit event that means we can stop running the game
@@ -304,22 +304,23 @@ sub init {
 }
 
 package View::Game;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager', app => 'app'};
+use Class::XSAccessor accessors =>
+  {evt_manager => 'evt_manager', app => 'app'};
 use Scalar::Util qw(weaken);
 use SDL;
 use SDL::App;
+
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
-our @pallete =
-(
-	(SDL::Color->new( -r => 0,   -g =>191,  -b =>247)),
-	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
-	(SDL::Color->new( -r => 247, -g =>202,  -b =>0)),
-	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46)),
-	(SDL::Color->new( -r => 237, -g =>0,    -b =>142)),
+our @pallete = (
+    (SDL::Color->new(-r => 0,   -g => 191, -b => 247)),
+    (SDL::Color->new(-r => 0,   -g => 148, -b => 217)),
+    (SDL::Color->new(-r => 247, -g => 202, -b => 0)),
+    (SDL::Color->new(-r => 0,   -g => 214, -b => 46)),
+    (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
 );
 
 sub new {
-    my ( $class, $event ) = (@_);
+    my ($class, $event) = (@_);
     my $self = {};
     bless $self, $class;
 
@@ -336,77 +337,82 @@ sub new {
 
 sub init {
     my $self = shift;
-    $self->app( SDL::App->new(
-        -width  => 640,
-        -height => 480,
-        -depth  => 16,
-        -title  => 'Tetris',
-    ));
-	
-	$self->{background} =  SDL::Rect->new( -x => 0, -y => 0, 
-	-w => $self->app->width, -h => $self->app->height);
-	my $color = $pallete[0];
-	$self->app->fill($self->{background},  $color );
-	
-	
+    $self->app(
+        SDL::App->new(
+            -width  => 640,
+            -height => 480,
+            -depth  => 16,
+            -title  => 'Tetris',
+        )
+    );
+
+    $self->{background} = SDL::Rect->new(
+        -x => 0,
+        -y => 0,
+        -w => $self->app->width,
+        -h => $self->app->height
+    );
+    my $color = $pallete[0];
+    $self->app->fill($self->{background}, $color);
+
+
 }
 
-sub show_grid
-{
-	my $self = shift;
-	
-	my $w = $self->app->width * (24/32); 
-	my $h = $self->app->height * (30/32); 
-	my $x = $self->app->width * (1/32);
-	my $y = $self->app->height * (1/32);
-	
-	$self->{grid} = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
-	my $color = $pallete[2];
-	$self->app->fill($self->{grid},  $color );
+sub show_grid {
+    my $self = shift;
+
+    my $w = $self->app->width *  (24 / 32);
+    my $h = $self->app->height * (30 / 32);
+    my $x = $self->app->width *  (1 / 32);
+    my $y = $self->app->height * (1 / 32);
+
+    $self->{grid} = SDL::Rect->new(-x => $x, -y => $y, -w => $w, -h => $h);
+    my $color = $pallete[2];
+    $self->app->fill($self->{grid}, $color);
 }
 
 # Should be in Game::Utility
-sub frame_rate
-{
-	my $secs = shift;
-	$secs = 2 unless defined $secs;
-	my $fps = 0;
+sub frame_rate {
+    my $secs = shift;
+    $secs = 2 unless defined $secs;
+    my $fps = 0;
     $frame_rate++;
-	
-    my $elapsed_time = time - $time;    
-    if ( $elapsed_time > $secs ) {
-	$fps = ($frame_rate/$secs);
+
+    my $elapsed_time = time - $time;
+    if ($elapsed_time > $secs) {
+        $fps = ($frame_rate / $secs);
         print "Frames per second: $frame_rate\n";
         $frame_rate = 0;
         $time       = time;
     }
-	return $fps;
+    return $fps;
 }
 
 sub notify {
     print "Notify in View Game \n" if $EDEBUG;
-    my ( $self, $event ) = (@_);
+    my ($self, $event) = (@_);
 
-    if ( defined $event ) {
-        if ( $event->isa('Event::Tick') ) {
+    if (defined $event) {
+        if ($event->isa('Event::Tick')) {
             print "Update Game View \n" if $GDEBUG;
-			frame_rate(1) if $FPS;
-			$self->show_grid();
-			$self->app->sync();
+            frame_rate(1) if $FPS;
+            $self->show_grid();
+            $self->app->sync();
+
             #if we got a quit event that means we can stop running the game
         }
-        if ( $event->isa('Event::GridBuilt') ) {
+        if ($event->isa('Event::GridBuilt')) {
             print "Showing Grid \n" if $GDEBUG;
-			$self->show_grid();
-			$self->app->sync();
+            $self->show_grid();
+            $self->app->sync();
         }
-        if ( $event->isa('Event::CharactorPlace') ) {
+        if ($event->isa('Event::CharactorPlace')) {
             print "Placing charactor sprite \n" if $GDEBUG;
-			$self->app->sync();
+            $self->app->sync();
         }
-        if ( $event->isa('Event::CharactorMove') ) {
+        if ($event->isa('Event::CharactorMove')) {
             print "Moving chractor sprite \n" if $GDEBUG;
-			$self->app->sync();
+            $self->app->sync();
         }
     }
 
@@ -419,7 +425,7 @@ sub notify {
 #Here is the Tetris logic #
 ###########################
 package Controller::Game;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager' };
+use Class::XSAccessor accessors => {evt_manager => 'evt_manager'};
 use Scalar::Util qw/weaken/;
 use Readonly;
 Readonly my $STATE_PREPARING => 0;
@@ -427,7 +433,7 @@ Readonly my $STATE_RUNNING   => 1;
 Readonly my $STATE_PAUSED    => 2;
 
 sub new {
-    my ( $class, $event ) = (@_);
+    my ($class, $event) = (@_);
     my $self = {};
     bless $self, $class;
 
@@ -457,18 +463,17 @@ sub start {
     $self->evt_manager->post($event);
 }
 
-sub show_grid
-{
-	my $self = shift;
-	
+sub show_grid {
+    my $self = shift;
+
 }
 
 sub notify {
     print "Notify in GAME \n" if $EDEBUG;
-    my ( $self, $event ) = (@_);
+    my ($self, $event) = (@_);
 
-    if ( defined $event && $event->isa('Event') ) {
-        if ( $self->{state} == $STATE_PREPARING ) {
+    if (defined $event && $event->isa('Event')) {
+        if ($self->{state} == $STATE_PREPARING) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $GDEBUG;
 

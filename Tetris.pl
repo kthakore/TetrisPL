@@ -2,15 +2,18 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Readonly;
-Readonly my $DIRECTION_UP    => 0;    #rotates blocks
-Readonly my $DIRECTION_DOWN  => 1;    #rotates blocks other way
-Readonly my $DIRECTION_LEFT  => 2;    # move left
-Readonly my $DIRECTION_RIGHT => 3;    # move right
+Readonly my $ROTATE_C   => 0;         # rotates blocks ClockWise
+Readonly my $ROTATE_CC   => 1;        # rotates blocks CounterClockWise
+Readonly my $DIRECTION_DOWN  => 2;    # Drops the block
+Readonly my $DIRECTION_LEFT  => 3;    # move left
+Readonly my $DIRECTION_RIGHT => 4;    # move right
+
+our ( $EDEBUG, $KEYDEBUG, $GDEBUG, $FPS ) = @ARGV; 
+
 
 our $frame_rate = 0;
 our $time       = time;
 
-our ( $EDEBUG, $KEYDEBUG, $GDEBUG ) = @ARGV;    #Event and key debug
 
 #Event Super Class
 package Event;
@@ -130,7 +133,6 @@ sub evt_queue : lvalue {
 # I think you can even do:
 # push @{$object->evt_queue}, 'bla';
 # my $event = $objetc->evt_queue->[0]; # $event gets 'baz'
-
 # from the code below I see you don't want the user
 # to interact directly with ->listeners, or do you?
 sub reg_listener {
@@ -156,22 +158,16 @@ sub post {
     my $self = shift;
     my $event = shift if (@_) or die "Post needs a TickEvent";
     print 'Event' . $event->name . "notified\n" if $EDEBUG;
-    die "Post needs a TickEvent as parameter"
+    die "Post needs a Event as parameter"
       unless $event->isa('Event');
+	#print 'Event' . $event->name ." called \n" if (!$event->isa('Event::Tick') && $EFDEBUG);
 
     foreach my $listener ( values %{ $self->listeners } ) {
         $listener->notify($event);
     }
 
+	
 
-    $frame_rate++;
-    my $elapsed_time = time - $time;    
-    if ( $elapsed_time > 2 ) {
-	$frame_rate = ($frame_rate/2);
-        print "Frames per second: $frame_rate\n";
-        $frame_rate = 0;
-        $time       = time;
-    }
 }
 
 package Controller::Keyboard;
@@ -221,9 +217,11 @@ sub notify {
             #later on we will add more stuff
             $event_to_process = Event::Quit->new
               if $key =~ 'escape';
-            $event_to_process = Request::CharactorMove->new($DIRECTION_UP)
+            $event_to_process = Request::CharactorMove->new($ROTATE_C)
               if $key =~ 'up';
-            $event_to_process = Request::CharactorMove->new($DIRECTION_DOWN)
+            $event_to_process = Request::CharactorMove->new($ROTATE_CC)
+              if $key =~ 'space';
+			$event_to_process = Request::CharactorMove->new($DIRECTION_DOWN)
               if $key =~ 'down';
             $event_to_process = Request::CharactorMove->new($DIRECTION_LEFT)
               if $key =~ 'left';
@@ -306,10 +304,19 @@ sub init {
 }
 
 package View::Game;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager' };
+use Class::XSAccessor accessors => { evt_manager => 'evt_manager', app => 'app'};
 use Scalar::Util qw(weaken);
 use SDL;
 use SDL::App;
+#http://www.colourlovers.com/palette/959495/Toothpaste_Face
+our @pallete =
+(
+	(SDL::Color->new( -r => 0,   -g =>191,  -b =>247)),
+	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
+	(SDL::Color->new( -r => 247, -g =>202,  -b =>0)),
+	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46)),
+	(SDL::Color->new( -r => 237, -g =>0,    -b =>142)),
+);
 
 sub new {
     my ( $class, $event ) = (@_);
@@ -329,12 +336,51 @@ sub new {
 
 sub init {
     my $self = shift;
-    $self->{window} = SDL::App->new(
+    $self->app( SDL::App->new(
         -width  => 640,
         -height => 480,
         -depth  => 16,
-        -title  => 'SDL Demo',
-    );
+        -title  => 'Tetris',
+    ));
+	
+	$self->{background} =  SDL::Rect->new( -x => 0, -y => 0, 
+	-w => $self->app->width, -h => $self->app->height);
+	my $color = $pallete[0];
+	$self->app->fill($self->{background},  $color );
+	
+	
+}
+
+sub show_grid
+{
+	my $self = shift;
+	
+	my $w = $self->app->width * (24/32); 
+	my $h = $self->app->height * (30/32); 
+	my $x = $self->app->width * (1/32);
+	my $y = $self->app->height * (1/32);
+	
+	$self->{grid} = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
+	my $color = $pallete[2];
+	$self->app->fill($self->{grid},  $color );
+}
+
+# Should be in Game::Utility
+sub frame_rate
+{
+	my $secs = shift;
+	$secs = 2 unless defined $secs;
+	my $fps = 0;
+    $frame_rate++;
+	
+    my $elapsed_time = time - $time;    
+    if ( $elapsed_time > $secs ) {
+	$fps = ($frame_rate/$secs);
+        print "Frames per second: $frame_rate\n";
+        $frame_rate = 0;
+        $time       = time;
+    }
+	return $fps;
 }
 
 sub notify {
@@ -344,17 +390,23 @@ sub notify {
     if ( defined $event ) {
         if ( $event->isa('Event::Tick') ) {
             print "Update Game View \n" if $GDEBUG;
-
+			frame_rate(1) if $FPS;
+			$self->show_grid();
+			$self->app->sync();
             #if we got a quit event that means we can stop running the game
         }
         if ( $event->isa('Event::GridBuilt') ) {
             print "Showing Grid \n" if $GDEBUG;
+			$self->show_grid();
+			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorPlace') ) {
             print "Placing charactor sprite \n" if $GDEBUG;
+			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorMove') ) {
             print "Moving chractor sprite \n" if $GDEBUG;
+			$self->app->sync();
         }
     }
 
@@ -403,6 +455,12 @@ sub start {
     print "Game RUNNING \n" if $GDEBUG;
     my $event = Event::GameStart->new($self);
     $self->evt_manager->post($event);
+}
+
+sub show_grid
+{
+	my $self = shift;
+	
 }
 
 sub notify {

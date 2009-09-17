@@ -1,31 +1,31 @@
-  sample_function
-     Usage     : How to use this function/method
-     Purpose   : What it does
-     Returns   : What it returns
-     Argument  : What it wants to know
-     Throws    : Exceptions and other anomolies
-     Comment   : This is a sample subroutine header.
-               : It is polite to include more pod and fewer comments.
-
-    See Also :
-
+  
 NAME
     SDL::Tutorial::Tetris - Tutorial using SDL and MVC design to make Tetris
 
 SYNOPSIS
-      use SDL::Tutorial::Tetris;
-      
-  run_Tetris();
 
+    $ Tetris.pl       
+ 
 DESCRIPTION
     Code to show MVC style game development with SDL Perl. If you do not
     know what Tetris is ... I am sorry. Try wikipedia. This tutorial is
     based of <sjbrown's Writing Games Tutorial>
 
 USAGE
-    There is a script installed with this in you PATH. Just type: perl
-    Tetris.sdlpl
+    There is a script called Tetris.PL.
+    Run that. It also takes arguments like this.
 
+    print all events
+     perl Tetris.pl 1 0 0 0 
+    print keypresses
+     perl Tetris.pl 0 1 0 0
+    print Game Status
+     perl Tetris.pl 0 0 1 0
+    print Frame per Seconds
+     perl Tetris.pl 0 0 0 1
+  
+    These arguments can be combined. 
+   
 BUGS
     None yet.
 

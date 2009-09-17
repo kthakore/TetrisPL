@@ -404,12 +404,12 @@ sub test_block
 	my $h = 20; 
 	my $x = ($self->app->width * (1/2))- ($w/2);
 	my $y = $self->app->height * (1/32);
-	print "Box is at".$_[0]."\n";
+#	print "Box is at".$_[0]."\n";
 	$y = $_[0] if defined $_[0];
 	my $box = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
 	my $color = $pallete[3];
 	$self->app->fill($box,  $color );
-	print "Box is at $y \n";
+#	print "Box is at $y \n";
 	return $y++;
 }
 our $y = 15;

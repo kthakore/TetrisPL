@@ -6,6 +6,8 @@ Module::Build->new
       license         => 'perl',
       requires 	=>
       {
-	      'SDL' => '2.2.2.15'
+	      'SDL' => '2.2.2.17',
+	      'Readonly' => '1.03',
+	      'Class::XSAccessor' => '1.03'
       }
     )->create_build_script;

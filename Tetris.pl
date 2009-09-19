@@ -421,8 +421,9 @@ sub notify {
         if ( $event->isa('Event::Tick') ) {
             print "Update Game View \n" if $GDEBUG;
 			frame_rate(1) if $FPS;
+			$y += 20;
 			$self->show_grid();
-			$self->test_block($y++);
+			$self->test_block($y);
 			$self->app->sync();
             #if we got a quit event that means we can stop running the game
         }
@@ -513,6 +514,44 @@ sub notify {
     #something so game state is still beign process we cannot have new input
     #now
 }
+
+#
+#Game Objects
+#
+
+package Blocks;
+require Exporter;
+our @EXPORT = qw/
+		$SQUARE $LINE $L_SHAPE $L_MIRROR $N_SHAPE $N_MIRROR $T_SHAPE
+		get_block_type get_x_init_pos get_y_init_pos
+	    /;
+use Pieces qw/@pieces/; 
+use Readonly;
+Readonly our $SQUARE   => 0;
+Readonly our $LINE     => 1;
+Readonly our $L_SHAPE  => 2;
+Readonly our $L_MIRROR => 3;
+Readonly our $N_SHAPE  => 4;
+Readonly our $N_MIRROR => 5;
+Readonly our $T_SHAPE  => 6;
+sub get_block_type
+{
+	die 'Expecting 4 arguments' if ($#_ != 4); 
+	my($piece, $rotation, $x, $y) = @_;
+	return $Pieces::pieces[$piece][$rotation][$x][$y];
+}
+sub get_x_init_pos {
+	die 'expecting 2 arguments' if ($#_ != 2);
+	my($piece, $rotation) = @_;
+	return $Pieces::pieces_init[$piece][$rotation][0];
+}
+sub get_y_init_pos {
+	die 'expecting 2 arguments' if ($#_ != 2);
+	my($piece, $rotation) = @_;
+	return $Pieces::pieces_init[$piece][$rotation][1];
+	
+}
+
 
 package main;    #On the go testing
 

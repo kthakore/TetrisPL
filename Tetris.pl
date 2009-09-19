@@ -521,6 +521,7 @@ sub notify {
 
 package Blocks;
 require Exporter;
+our @ISA = qw/Exporter/;
 our @EXPORT = qw/
 		$SQUARE $LINE $L_SHAPE $L_MIRROR $N_SHAPE $N_MIRROR $T_SHAPE
 		get_block_type get_x_init_pos get_y_init_pos

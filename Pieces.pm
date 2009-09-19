@@ -3,7 +3,8 @@ package Pieces;
 use strict;
 use warnings;
 require Exporter;
-our $EXPORT =  qw/@pieces @pieces_init/;
+our @ISA = qw/Exporter/;
+our @EXPORT =  qw/@pieces @pieces_init/;
 
 
 our @pieces  =

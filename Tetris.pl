@@ -574,13 +574,18 @@ sub new
     my $class = shift;
     my $self = {};
     bless $class, $self;
-    $self->init();
+    $self->init(@_);
     return $self;   
 }
 
 sub init
 {
   my $self = shift;
+   $self->{board_line_width} = 6;
+   $self->{block_size} = 16;
+   $self->{board_position} = 320;
+   $self->{screen_height} = 480;
+     
    $self->{width} = 10;
    $self->{height} = 20;
   $self->grid( [ [$self->{width} x $self->{height}] x $self->{height} ] );
@@ -588,7 +593,6 @@ sub init
 
 sub store_piece
 {
-
   my $self = shift;
   die 'Expecting 4 parameters'  if ($#_ != 4);
   my ($x, $y, $piece, $rotation) = @_;
@@ -650,6 +654,46 @@ sub is_free_loc
 	return 1;
 }
 
+sub get_x_pos_in_pixels
+{
+	my $self = shift;
+	die 'Expecting 1 parameter' if $#_ != 1;
+	return  (($self->{position} - ($self->{block_size} * ($self->{width} /2)) ) +($_[0] * $self->{block_size} ) );
+}
+
+sub get_y_pos_in_pixels
+{
+	        my $self = shift;
+	        die 'Expecting 1 parameter' if $#_ != 1;
+	        return  (($self->{screen_height} - ($self->{block_size} * $self->{height} ) ) +($_[0] * $self->{block_size} ) );
+
+}
+
+sub is_possible_movement
+{
+	my $self = shift;
+	die 'Expecting 4 parameters' if $#_ !=4;
+  	my($x, $y, $piece, $rotation) = @_;
+
+	for(my $i1 = $x, my $i2 =0; $i1 < $x + 5; $i1++, $i2++)
+	{
+ 	   for(my $j1 = $y, my $j2 = 0; $j1 < $y + 5; $j1++, $j2++)
+	   {
+		#check if block goes outside limits
+		if( $i1 < 0 || $i1 > ($self->{width} -1) || $j1 > ($self->{height} -1) )
+		{
+			return 0 if(get_block_type($piece, $rotation, $j2, $i2) != 0 ) 
+		}
+		#check collision with blocks already on board
+		if($j1 >=0 )
+		{
+			return 0 if( (get_block_type($piece, $rotation, $j2, $i2) != 0) && !($self->is_free_loc($i1, $j1)) );
+		}
+	   }
+	}
+	#no collision
+	return 1;
+}
 
 package main;    #On the go testing
 

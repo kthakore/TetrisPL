@@ -535,6 +535,15 @@ Readonly our $L_MIRROR => 3;
 Readonly our $N_SHAPE  => 4;
 Readonly our $N_MIRROR => 5;
 Readonly our $T_SHAPE  => 6;
+
+sub new
+{
+	my $class = shift;
+	my $self = {};
+	bless $self, $class;
+	return $self;
+}
+
 sub get_block_type
 {
 	die 'Expecting 4 arguments' if ($#_ != 4); 
@@ -553,7 +562,44 @@ sub get_y_init_pos {
 	
 }
 
+package Grid;
+use Class::XSAccessor accessors => { blocks => 'blocks', grid => 'grid' };
+BEGIN
+{
+	Blocks->import;
+}
+sub new
+{
+    my $class = shift;
+    my $self = {};
+    bless $class, $self;
+    $self->init();
+    return $self;   
+}
 
+sub init
+{
+  my $self = shift;
+  my $x = 10;
+  my $y = 20;
+  $self->grid( [ [$x x $y] x $y ] );
+}
+
+sub store_piece
+{
+
+  my $self = shift;
+  die'Expecting 4 parameters'  if ($#_ != 4);
+  my ($x, $y, $piece, $rotation) = @_;
+  for( my $i1 = $x, my $i2 =0; $i1< $x + 5; $i1++, $i2++)
+  {
+	  for( my $j1 = $y, my $j2 = 0; $j1 < $y + 5; $j1++, $j2++)
+	  {
+		  $self->grid->[$i1][$j1] = 1 if( get_block_type($piece, $rotation,$j2, $i2) != 0)
+
+	  }
+  }
+}
 package main;    #On the go testing
 
 my $manager  = Event::Manager->new;

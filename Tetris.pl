@@ -568,6 +568,7 @@ BEGIN
 {
 	Blocks->import;
 }
+
 sub new
 {
     my $class = shift;
@@ -580,16 +581,16 @@ sub new
 sub init
 {
   my $self = shift;
-  my $x = 10;
-  my $y = 20;
-  $self->grid( [ [$x x $y] x $y ] );
+   $self->{width} = 10;
+   $self->{height} = 20;
+  $self->grid( [ [$self->{width} x $self->{height}] x $self->{height} ] );
 }
 
 sub store_piece
 {
 
   my $self = shift;
-  die'Expecting 4 parameters'  if ($#_ != 4);
+  die 'Expecting 4 parameters'  if ($#_ != 4);
   my ($x, $y, $piece, $rotation) = @_;
   for( my $i1 = $x, my $i2 =0; $i1< $x + 5; $i1++, $i2++)
   {
@@ -600,6 +601,56 @@ sub store_piece
 	  }
   }
 }
+
+sub is_game_over
+{
+	my $self = shift;
+	for (my $i = 0; $i < $self->{width}; $i++)  
+	    {  
+		       return 1   if ( $self->grid->[$i][0] == 0);  
+            } 
+	return 0;
+}
+
+#removes a line and moves everything one row down
+sub delete_line
+{
+    my $self = shift;
+    die 'Expected 1 parameters' if ($#_ != 1);
+    my $dline = shift;
+    for (my $j = $dline; $j >0; $j--)
+    {
+	 for (my $i = 0; $i < $self->{width}; $j++)  
+	         {  
+			             $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
+                 } 
+    }
+}
+
+sub delete_possible_lines
+{
+	my $self = shift;
+	for (my $j=0; $j < $self->{height}; $j++ )
+	{
+		my $i =0;
+		while ($i < $self->{width} )
+		{
+		last	if ($self->grid->[$i][$j] != 1);  
+			            $i++; 
+		}
+		$self->delete_line($j) if $i == $self->{width};
+	}
+}
+
+sub is_free_loc 
+{
+	my $self = shift;
+	die 'Expecting 2 parameters' if $#_ != 2;
+	return 0 if $self->grid->[$_[0]][$_[1]] == 1;
+	return 1;
+}
+
+
 package main;    #On the go testing
 
 my $manager  = Event::Manager->new;

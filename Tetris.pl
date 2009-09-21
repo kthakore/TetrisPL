@@ -283,7 +283,8 @@ use SDL::App;
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
 our @palette =
 (
-	(SDL::Color->new( -r => 0,   -g =>191,  -b =>247)),
+	(SDL::Color->new( -r => 50,  -g =>50,   -b =>60 )),
+	(SDL::Color->new( -r => 70,   -g =>191,  -b =>247)),
 	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
 	(SDL::Color->new( -r => 247, -g =>202,  -b =>0  )),
 	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46 )),
@@ -394,7 +395,7 @@ sub show_charactor  # peice
         {  
 #             // Get the type of the block and draw it with the correct color  
 			my $type = Blocks::get_block_type ($piece, $rotation, $j, $i);
-              $piece_color = $palette[1] if($type == 1);
+              $piece_color = $palette[2] if($type == 1);
 			  $piece_color = $palette[3] if($type == 2);
              if ($type != 0)  
 				{	my $block_size = $self->{grid}->{block_size};

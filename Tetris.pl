@@ -285,7 +285,7 @@ our @pallete =
 	(SDL::Color->new( -r => 0,   -g =>191,  -b =>247)),
 	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
 	(SDL::Color->new( -r => 247, -g =>202,  -b =>0  )),
-	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46)),
+	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46 )),
 	(SDL::Color->new( -r => 237, -g =>0,    -b =>142)),
 );
 
@@ -329,20 +329,50 @@ sub show_grid
 	my $x = $self->app->width * (1/32);
 	my $y = $self->app->height * (1/32);
 	
-	$self->{grid} = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
+	$self->{gridReal} = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
 	my $color = $pallete[2];
-	$self->app->fill($self->{grid},  $color );
+	$self->app->fill($self->{gridReal},  $color );
 }
 
 #needs the charactor now
 sub show_charactor  # peice
 {
     my $self = shift;
-	die 'Expecting 4 arguments' if ($#_ != 4); 
-	my $peiceColor = $pallete[1];
+	die 'Expecting 4 arguments' if ($#_ != 3); 
+	my $piece_color = $pallete[1];
 	my($x, $y, $piece, $rotation) = @_;
-	# my $pixels_x = $self->grid->GetXPosInPixels ($x);  
-#     my $pixels_y = $self->grid->GetYPosInPixels ($y);
+	my $pixels_x = $self->{grid}->get_x_pos_in_pixels($x);  
+    my $pixels_y = $self->{grid}->get_y_pos_in_pixels($y);  
+	
+     for (my $i = 0; $i < 5; $i++)  
+     {  
+         for (my $j = 0; $j < 5; $j++)  
+        {  
+#             // Get the type of the block and draw it with the correct color  
+			my $type = Blocks::get_block_type ($piece, $rotation, $j, $i);
+              $piece_color = $pallete[1] if($type == 1);
+			  $piece_color = $pallete[3] if($type == 2);
+             if ($type != 0)  
+				{	my $block_size = $self->{grid}->{block_size};
+					$self->draw_rectangle ( $pixels_x + $i * $block_size,  
+                                     $pixels_y + $j * $block_size,  
+                                     $block_size - 1,  
+                                     $block_size - 1,  
+                                     $piece_color);  
+				}  
+		}
+	}	 
+	
+}
+
+sub draw_rectangle
+{
+   my $self = shift;
+   die 'Expecting 5 parameters got: '.$#_  if ($#_ != 4);
+   my ($x, $y, $w, $h, $color) = @_;
+   my $box = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
+	$self->app->fill($box,  $color );
+	#print "Drew rect at ( $x $y $w $h ) \n";
 }
 
 sub move_charactor
@@ -385,9 +415,7 @@ sub test_block
 	my $color = $pallete[3];
 	$self->app->fill($box,  $color );
 #	print "Box is at $y \n";
-	return $y++;
 }
-our $y = 15;
 sub notify {
     print "Notify in View Game \n" if $EDEBUG;
     my ( $self, $event ) = (@_);
@@ -404,6 +432,7 @@ sub notify {
 			$self->{grid} = $event->grid;
 			#print Dumper $self->{grid};
 			$self->show_grid();
+			$self->show_charactor(10, 10, 3, 1);
 			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorPlace') ) {
@@ -581,9 +610,6 @@ sub new
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->init(@_);
-
-	
-
     return $self;   
 }
 
@@ -605,7 +631,7 @@ sub init
 sub store_piece
 {
   my $self = shift;
-  die 'Expecting 4 parameters'  if ($#_ != 4);
+  die 'Expecting 4 parameters'  if ($#_ != 3);
   my ($x, $y, $piece, $rotation) = @_;
   for( my $i1 = $x, my $i2 =0; $i1< $x + 5; $i1++, $i2++)
   {
@@ -659,7 +685,7 @@ sub delete_possible_lines
 sub is_free_loc 
 {
 	my $self = shift;
-	die 'Expecting 2 parameters' if $#_ != 2;
+	die 'Expecting 2 parameters' if $#_ != 1;
 	return 0 if $self->grid->[$_[0]][$_[1]] == 1;
 	return 1;
 }
@@ -667,15 +693,15 @@ sub is_free_loc
 sub get_x_pos_in_pixels
 {
 	my $self = shift;
-	die 'Expecting 1 parameter' if $#_ != 1;
-	return  (($self->{position} - ($self->{block_size} * ($self->{width} /2)) ) +($_[0] * $self->{block_size} ) );
+	die 'Expecting 1 parameter got '.$_[0] if ( !defined ($_[0] ));
+	return  (($self->{board_position} - ($self->{block_size} * ($self->{width} /2)) ) +($_[0] * $self->{block_size} ) );
 }
 
 sub get_y_pos_in_pixels
 {
-	        my $self = shift;
-	        die 'Expecting 1 parameter' if $#_ != 1;
-	        return  (($self->{screen_height} - ($self->{block_size} * $self->{height} ) ) +($_[0] * $self->{block_size} ) );
+	my $self = shift;
+	die 'Expecting 1 parameter got '.$_[0] if ( !defined ($_[0] ));
+	return  (($self->{screen_height} - ($self->{block_size} * $self->{height} ) ) +($_[0] * $self->{block_size} ) );
 
 }
 

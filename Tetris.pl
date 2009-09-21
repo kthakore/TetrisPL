@@ -49,12 +49,14 @@ sub new {
 
 package Event::GridBuilt;    #Tetris has a grid
 use base 'Event';
-use Class::XSAccessor accessors => { grid => 'grid', };
+use Data::Dumper;
+use Class::XSAccessor accessors => { grid => 'grid' };
 
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
     $self->name('Grid Built Event');
+	$self->grid($_[0]);
     return $self;
 }
 
@@ -68,6 +70,8 @@ sub new {
     $self->name('Game Start Event');
     return $self;
 }
+
+
 
 package Request::CharactorMove;
 use base 'Event';
@@ -124,17 +128,6 @@ sub evt_queue : lvalue {
     return shift->{evt_queue};
 }
 
-#
-# so now you can access them like:
-# $object->listeners->{foo} = 'bar';
-# my $listener = $object->listeners->{foo}; # $listener gets 'bar'
-#
-# $object->evt_queue->[0] = 'baz';
-# I think you can even do:
-# push @{$object->evt_queue}, 'bla';
-# my $event = $objetc->evt_queue->[0]; # $event gets 'baz'
-# from the code below I see you don't want the user
-# to interact directly with ->listeners, or do you?
 sub reg_listener {
     my ( $self, $listener ) = (@_);
     $self->listeners->{$listener} = $listener
@@ -175,7 +168,6 @@ use Class::XSAccessor accessors =>
   { event => 'event', evt_manager => 'evt_manager' };
 use SDL;
 use SDL::Event;
-use Scalar::Util qw(weaken);
 
 sub new {
     my ( $class, $event ) = (@_);
@@ -186,10 +178,7 @@ sub new {
       unless defined $event && $event->isa('Event::Manager');
 
     $self->evt_manager($event);
-    my $weak_self = $self;
-    weaken($weak_self);
-
-    $self->evt_manager->reg_listener($weak_self);
+    $self->evt_manager->reg_listener($self);
     return $self;
 }
 
@@ -241,8 +230,7 @@ sub notify {
 }
 
 package Controller::CPUSpinner;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager' };
-use Scalar::Util qw(weaken);
+use Class::XSAccessor accessors => { evt_manager => 'evt_manager'};
 
 sub new {
     my ( $class, $event ) = (@_);
@@ -253,9 +241,7 @@ sub new {
       unless defined $event and $event->isa('Event::Manager');
 
     $self->evt_manager($event);
-    my $weak_self = $self;
-    weaken $weak_self;
-    $self->evt_manager->reg_listener($weak_self);
+    $self->evt_manager->reg_listener($self);
     $self->{keep_going} = 1;
     return $self;
 }
@@ -288,24 +274,9 @@ sub notify {
 #Here comes the code for the actual game objects #
 ##################################################
 
-package Sprite::Square;
-use base 'SDL::Surface';
-
-sub new {
-    my $class = shift;
-    my $self  = {};
-    bless $self, $class;
-    $self->init;
-}
-
-sub init {
-    my $self = shift;
-
-}
-
 package View::Game;
 use Class::XSAccessor accessors => { evt_manager => 'evt_manager', app => 'app'};
-use Scalar::Util qw(weaken);
+use Data::Dumper;
 use SDL;
 use SDL::App;
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
@@ -327,9 +298,7 @@ sub new {
       unless defined $event and $event->isa('Event::Manager');
 
     $self->evt_manager($event);
-    my $weak_self = $self;
-    weaken $weak_self;
-    $self->evt_manager->reg_listener($weak_self);
+    $self->evt_manager->reg_listener($self);
     $self->init;
     return $self;
 }
@@ -366,8 +335,14 @@ sub show_grid
 }
 
 #needs the charactor now
-sub show_charactor
+sub show_charactor  # peice
 {
+    my $self = shift;
+	die 'Expecting 4 arguments' if ($#_ != 4); 
+	my $peiceColor = $pallete[1];
+	my($piece, $rotation, $x, $y) = @_;
+	# my $pixels_x = mBoard->GetXPosInPixels (pX);  
+#     my $pixels_y = mBoard->GetYPosInPixels (pY);
 }
 
 sub move_charactor
@@ -421,15 +396,14 @@ sub notify {
         if ( $event->isa('Event::Tick') ) {
             print "Update Game View \n" if $GDEBUG;
 			frame_rate(1) if $FPS;
-			$y += 20;
-			$self->show_grid();
-			$self->test_block($y);
-			$self->app->sync();
+			$self->app->sync() if $self->{grid}
             #if we got a quit event that means we can stop running the game
         }
         if ( $event->isa('Event::GridBuilt') ) {
             print "Showing Grid \n" if $GDEBUG;
-			$self->show_grid();
+			$self->{grid} = $event->grid;
+			#print Dumper $self->{grid};
+			#$self->show_grid();
 			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorPlace') ) {
@@ -452,9 +426,15 @@ sub notify {
 ###########################
 
 package Controller::Game;
-use Class::XSAccessor accessors => { evt_manager => 'evt_manager' };
-use Scalar::Util qw/weaken/;
+use Class::XSAccessor accessors => { evt_manager => 'evt_manager', grid => 'grid' };
+use Data::Dumper;
 use Readonly;
+BEGIN
+{
+	Grid->import;
+	Blocks->import
+}
+
 Readonly my $STATE_PREPARING => 0;
 Readonly my $STATE_RUNNING   => 1;
 Readonly my $STATE_PAUSED    => 2;
@@ -468,32 +448,52 @@ sub new {
       unless defined $event and $event->isa('Event::Manager');
 
     $self->evt_manager($event);
-    my $weak_self = $self;
-    weaken($weak_self);
-    $self->evt_manager->reg_listener($weak_self);
+    $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
     print "Game PREPARING ... \n" if $GDEBUG;
 
-    #$self->{player} =;
-    #$self->{window} =;
-    #$self->{block_queue} =;
+    #$self->{player} =; For points, level so on
+    $self->grid ( Grid->new($self->evt_manager));
+	#print $self->grid.'grid';
     return $self;
 }
 
 sub start {
     my $self = shift;
-
-    #$self->{window}->build;
+    $self->init_grid;
     $self->{state} = $STATE_RUNNING;
     print "Game RUNNING \n" if $GDEBUG;
     my $event = Event::GameStart->new($self);
     $self->evt_manager->post($event);
 }
 
-sub show_grid
+sub init_grid
 {
 	my $self = shift;
+	$self->{piece} = int(rand(6)); # 0 1 2 3 4 5 6 Pieces
+	$self->{pieceRotation} = int(rand(3)); # 0 1 2 3 rotations
+	print Dumper $self->grid;
+	$self->{posx} = $self->grid->{width}/2 + get_x_init_pos($self->{piece}, $self->{pieceRotation});
+	$self->{posy} = get_y_init_pos($self->{piece}, $self->{rotation});
 	
+	#     //  Next piece  
+     $self->{next_piece} = int(rand(6));   
+     $self->{next_rotation}   = int(rand(3));
+     $self->{next_posx} = $self->grid->{width} + 5;
+     $self->{next_posy} = 5;
+}
+
+sub create_new_piece
+{
+	my $self = shift;
+	$self->{piece} = $self->{next_piece};
+	$self->{pieceRotation} = $self->{next_rotation};
+	$self->{posx} = $self->grid->{width}/2 + get_x_init_pos($self->{piece}, $self->{rotation});
+	$self->{posy} = get_y_init_pos($self->{piece}, $self->{rotation});
+	
+	#     //  Next piece  
+     $self->{next_piece} = int(rand(6));   
+     $self->{next_rotation}   = int(rand(3));
 }
 
 sub notify {
@@ -504,8 +504,6 @@ sub notify {
         if ( $self->{state} == $STATE_PREPARING ) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $GDEBUG;
-
-            #if we got a quit event that means we can stop running the game
             $self->start;
         }
     }
@@ -563,7 +561,8 @@ sub get_y_init_pos {
 }
 
 package Grid;
-use Class::XSAccessor accessors => { blocks => 'blocks', grid => 'grid' };
+use Data::Dumper;
+use Class::XSAccessor accessors => { evt_manager => 'evt_manager', blocks => 'blocks', grid => 'grid' };
 BEGIN
 {
 	Blocks->import;
@@ -571,16 +570,26 @@ BEGIN
 
 sub new
 {
-    my $class = shift;
+    my ( $class, $event ) = (@_);
     my $self = {};
-    bless $class, $self;
+    bless $self, $class;
+
+    die 'Expects an Event::Manager'
+      unless defined $event and $event->isa('Event::Manager');
+
+    $self->evt_manager($event);
+    $self->evt_manager->reg_listener($self);
     $self->init(@_);
+
+	$self->evt_manager->post(Event::GridBuilt->new($self) );
+
     return $self;   
 }
 
 sub init
 {
   my $self = shift;
+  #TODO: Get the following from @_
    $self->{board_line_width} = 6;
    $self->{block_size} = 16;
    $self->{board_position} = 320;
@@ -588,7 +597,8 @@ sub init
      
    $self->{width} = 10;
    $self->{height} = 20;
-  $self->grid( [ [$self->{width} x $self->{height}] x $self->{height} ] );
+   $self->grid( [ [$self->{width} x $self->{height}] x $self->{height} ] );
+  
 }
 
 sub store_piece
@@ -601,7 +611,6 @@ sub store_piece
 	  for( my $j1 = $y, my $j2 = 0; $j1 < $y + 5; $j1++, $j2++)
 	  {
 		  $self->grid->[$i1][$j1] = 1 if( get_block_type($piece, $rotation,$j2, $i2) != 0)
-
 	  }
   }
 }
@@ -694,6 +703,20 @@ sub is_possible_movement
 	#no collision
 	return 1;
 }
+
+sub notify
+{
+	    print "Notify in Grid \n" if $EDEBUG;
+    my ( $self, $event ) = (@_);
+
+    if ( defined $event && $event->isa('Event::Tick') ) {
+			#do checks
+        
+    }
+}
+
+
+
 
 package main;    #On the go testing
 

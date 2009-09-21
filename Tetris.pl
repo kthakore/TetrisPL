@@ -68,6 +68,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
     $self->name('Game Start Event');
+	$self->game($_[0]);
     return $self;
 }
 
@@ -280,7 +281,7 @@ use Data::Dumper;
 use SDL;
 use SDL::App;
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
-our @pallete =
+our @palette =
 (
 	(SDL::Color->new( -r => 0,   -g =>191,  -b =>247)),
 	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
@@ -310,11 +311,12 @@ sub init {
         -height => 480,
         -depth  => 16,
         -title  => 'Tetris',
+	-init   => SDL_INIT_VIDEO 
     ));
 	
 	$self->{background} =  SDL::Rect->new( -x => 0, -y => 0, 
 	-w => $self->app->width, -h => $self->app->height);
-	my $color = $pallete[0];
+	my $color = $palette[0];
 	$self->app->fill($self->{background},  $color );
 	
 	
@@ -324,14 +326,56 @@ sub show_grid
 {
 	my $self = shift;
 	
-	my $w = $self->app->width * (24/32); 
-	my $h = $self->app->height * (30/32); 
-	my $x = $self->app->width * (1/32);
-	my $y = $self->app->height * (1/32);
+	#my $w = $self->app->width * (24/32); 
+	#my $h = $self->app->height * (30/32); 
+	#my $x = $self->app->width * (1/32);
+	#my $y = $self->app->height * (1/32);
 	
-	$self->{gridReal} = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
-	my $color = $pallete[2];
-	$self->app->fill($self->{gridReal},  $color );
+#     // Calculate the limits of the board in pixels  
+     my $x1 = $self->{grid}->{block_size} - ($self->{grid}->{block_size}* ($self->{grid}->{width}  / 2)) - 1;  
+     my $x2 = $self->{grid}->{block_size} + ($self->{grid}->{block_size}* ($self->{grid}->{width} / 2));  
+     my $y = $self->{app}->height - ($self->{grid}->{block_size}* $self->{grid}->{height});  
+#   
+#     // Check that the vertical margin is not to small  
+#     //assert (mY > MIN_VERTICAL_MARGIN);  
+#   
+#     // Rectangles that delimits the board  
+     $self->draw_rectangle ($x1 - $self->{grid}->{board_line_width},$y, $x1, $self->app->height - 1, $palette[0]);  
+#   
+     $self->draw_rectangle ($x2,$y,$x2 + $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[0]);  
+#   
+#     // Check that the horizontal margin is not to small  
+#     //assert (mX1 > MIN_HORIZONTAL_MARGIN);  
+#   
+#     // Drawing the blocks that are already stored in the board  
+    $x1 += 1;  
+     for (my $i = 0; $i < $self->{grid}->{width}; $i++)  
+     {  
+         for (my $j = 0; $j < $self->{grid}->{height}; $j++)  
+         {  
+#             // Check if the block is filled, if so, draw it  
+             if (!$self->{grid}->is_free_loc($i, $j))  
+			 {
+                 $self->draw_rectangle ($x1 + $i * $self->{grid}->{block_size},  
+                                        $y + $j * $self->{grid}->{block_size},  
+                                         $self->{grid}->{block_size}- 1,  
+                                         $self->{grid}->{block_size}- 1,  
+                                         $palette[4]);  
+			 }
+			 else
+			 {
+			
+                 $self->draw_rectangle ($x1 + $i * $self->{grid}->{block_size},  
+                                        $y + $j * $self->{grid}->{block_size},  
+                                         $self->{grid}->{block_size}- 1,  
+                                         $self->{grid}->{block_size}- 1,  
+                                         $palette[1]);  
+
+			 }
+         }  
+     }  
+	
+	
 }
 
 #needs the charactor now
@@ -339,7 +383,7 @@ sub show_charactor  # peice
 {
     my $self = shift;
 	die 'Expecting 4 arguments' if ($#_ != 3); 
-	my $piece_color = $pallete[1];
+	my $piece_color = $palette[1];
 	my($x, $y, $piece, $rotation) = @_;
 	my $pixels_x = $self->{grid}->get_x_pos_in_pixels($x);  
     my $pixels_y = $self->{grid}->get_y_pos_in_pixels($y);  
@@ -350,8 +394,8 @@ sub show_charactor  # peice
         {  
 #             // Get the type of the block and draw it with the correct color  
 			my $type = Blocks::get_block_type ($piece, $rotation, $j, $i);
-              $piece_color = $pallete[1] if($type == 1);
-			  $piece_color = $pallete[3] if($type == 2);
+              $piece_color = $palette[1] if($type == 1);
+			  $piece_color = $palette[3] if($type == 2);
              if ($type != 0)  
 				{	my $block_size = $self->{grid}->{block_size};
 					$self->draw_rectangle ( $pixels_x + $i * $block_size,  
@@ -365,6 +409,16 @@ sub show_charactor  # peice
 	
 }
 
+sub draw_scene
+{
+	my $self = shift;
+	my $game = $self->{game};
+	
+	$self->show_grid();
+	$self->show_charactor($game->{posx}, $game->{posy}, $game->{piece}, $game->{pieceRotation});
+	$self->show_charactor($game->{next_posx}, $game->{next_posy}, $game->{next_piece}, $game->{next_rotation});
+}
+
 sub draw_rectangle
 {
    my $self = shift;
@@ -375,13 +429,6 @@ sub draw_rectangle
 	#print "Drew rect at ( $x $y $w $h ) \n";
 }
 
-sub move_charactor
-{
-}
-
-sub get_charactor_sprite
-{
-}
 
 # Should be in Game::Utility
 sub frame_rate
@@ -401,21 +448,6 @@ sub frame_rate
 	return $fps;
 }
 
-sub test_block
-{
-	my $self = shift;
-	
-	my $w = 20; 
-	my $h = 20; 
-	my $x = ($self->app->width * (1/2))- ($w/2);
-	my $y = $self->app->height * (1/32);
-#	print "Box is at".$_[0]."\n";
-	$y = $_[0] if defined $_[0];
-	my $box = SDL::Rect->new( -x => $x, -y =>$y, -w => $w, -h => $h);
-	my $color = $pallete[3];
-	$self->app->fill($box,  $color );
-#	print "Box is at $y \n";
-}
 sub notify {
     print "Notify in View Game \n" if $EDEBUG;
     my ( $self, $event ) = (@_);
@@ -431,8 +463,14 @@ sub notify {
             print "Showing Grid \n" if $GDEBUG;
 			$self->{grid} = $event->grid;
 			#print Dumper $self->{grid};
-			$self->show_grid();
-			$self->show_charactor(10, 10, 3, 1);
+			
+			$self->app->sync();
+        }
+        if ( $event->isa('Event::GameStart') ) {
+            print "Starting Game \n" if $GDEBUG;
+			$self->{game} = $event->game;
+		    $self->draw_scene() if $self->{grid};
+		    #die;
 			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorPlace') ) {
@@ -619,12 +657,16 @@ sub init
   #TODO: Get the following from @_
    $self->{board_line_width} = 6;
    $self->{block_size} = 16;
-   $self->{board_position} = 320;
+   $self->{board_position} = 200;
    $self->{screen_height} = 480;
      
    $self->{width} = 10;
    $self->{height} = 20;
-   $self->grid( [ [$self->{width} x $self->{height}] x $self->{height} ] );
+   my $arr_ref = []; 
+   #print Dumper $arr_ref;
+   #print Dumper $arr_ref->[0];
+   #print Dumper $arr_ref->[0][0];
+   $self->grid( $arr_ref);
   
 }
 
@@ -686,8 +728,12 @@ sub is_free_loc
 {
 	my $self = shift;
 	die 'Expecting 2 parameters' if $#_ != 1;
-	return 0 if $self->grid->[$_[0]][$_[1]] == 1;
-	return 1;
+	#die 'got '.$_[0].' '.$_[1];
+	my $grid = $self->grid();
+	#die Dumper $grid;
+	return 1 if !defined($grid->[$_[0]][$_[1]]);
+	return 0 if ($grid->[$_[0]][$_[1]] == 1);
+	
 }
 
 sub get_x_pos_in_pixels
@@ -754,4 +800,3 @@ my $gameView = View::Game->new($manager);
 my $game     = Controller::Game->new($manager);
 
 $spinner->run;
-

@@ -340,9 +340,9 @@ sub show_charactor  # peice
     my $self = shift;
 	die 'Expecting 4 arguments' if ($#_ != 4); 
 	my $peiceColor = $pallete[1];
-	my($piece, $rotation, $x, $y) = @_;
-	# my $pixels_x = mBoard->GetXPosInPixels (pX);  
-#     my $pixels_y = mBoard->GetYPosInPixels (pY);
+	my($x, $y, $piece, $rotation) = @_;
+	# my $pixels_x = $self->grid->GetXPosInPixels ($x);  
+#     my $pixels_y = $self->grid->GetYPosInPixels ($y);
 }
 
 sub move_charactor
@@ -403,7 +403,7 @@ sub notify {
             print "Showing Grid \n" if $GDEBUG;
 			$self->{grid} = $event->grid;
 			#print Dumper $self->{grid};
-			#$self->show_grid();
+			$self->show_grid();
 			$self->app->sync();
         }
         if ( $event->isa('Event::CharactorPlace') ) {
@@ -454,7 +454,7 @@ sub new {
 
     #$self->{player} =; For points, level so on
     $self->grid ( Grid->new($self->evt_manager));
-	#print $self->grid.'grid';
+	$self->evt_manager->post(Event::GridBuilt->new($self->grid) );
     return $self;
 }
 
@@ -472,9 +472,8 @@ sub init_grid
 	my $self = shift;
 	$self->{piece} = int(rand(6)); # 0 1 2 3 4 5 6 Pieces
 	$self->{pieceRotation} = int(rand(3)); # 0 1 2 3 rotations
-	print Dumper $self->grid;
-	$self->{posx} = $self->grid->{width}/2 + get_x_init_pos($self->{piece}, $self->{pieceRotation});
-	$self->{posy} = get_y_init_pos($self->{piece}, $self->{rotation});
+	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 	
 	#     //  Next piece  
      $self->{next_piece} = int(rand(6));   
@@ -488,8 +487,8 @@ sub create_new_piece
 	my $self = shift;
 	$self->{piece} = $self->{next_piece};
 	$self->{pieceRotation} = $self->{next_rotation};
-	$self->{posx} = $self->grid->{width}/2 + get_x_init_pos($self->{piece}, $self->{rotation});
-	$self->{posy} = get_y_init_pos($self->{piece}, $self->{rotation});
+	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos( $self->{piece}, $self->{rotation} );
+	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 	
 	#     //  Next piece  
      $self->{next_piece} = int(rand(6));   
@@ -518,6 +517,7 @@ sub notify {
 #
 
 package Blocks;
+use Data::Dumper;
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT = qw/
@@ -544,17 +544,18 @@ sub new
 
 sub get_block_type
 {
-	die 'Expecting 4 arguments' if ($#_ != 4); 
+	die 'Expecting 4 arguments' if ($#_ != 3); 
 	my($piece, $rotation, $x, $y) = @_;
 	return $Pieces::pieces[$piece][$rotation][$x][$y];
 }
 sub get_x_init_pos {
-	die 'expecting 2 arguments' if ($#_ != 2);
+	die 'expecting 2 arguments got: ' if ($#_ != 1);
+	
 	my($piece, $rotation) = @_;
 	return $Pieces::pieces_init[$piece][$rotation][0];
 }
 sub get_y_init_pos {
-	die 'expecting 2 arguments' if ($#_ != 2);
+	die 'expecting 2 arguments' if ($#_ != 1);
 	my($piece, $rotation) = @_;
 	return $Pieces::pieces_init[$piece][$rotation][1];
 	
@@ -581,7 +582,7 @@ sub new
     $self->evt_manager->reg_listener($self);
     $self->init(@_);
 
-	$self->evt_manager->post(Event::GridBuilt->new($self) );
+	
 
     return $self;   
 }
@@ -727,3 +728,4 @@ my $gameView = View::Game->new($manager);
 my $game     = Controller::Game->new($manager);
 
 $spinner->run;
+

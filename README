@@ -5,6 +5,17 @@ NAME
 SYNOPSIS
 
     $ Tetris.pl       
+
+DEPENDENCIES
+    Class::XSAccessor
+    Readonly
+
+KEYS
+
+    Space Key    - Rotate
+    Up Arrow Key - Rotate the other way
+    Down Key     - Slide Piece Down
+    Left, Right  - Step Piece Left or Right
  
 DESCRIPTION
     Code to show MVC style game development with SDL Perl. If you do not

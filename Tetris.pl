@@ -573,6 +573,12 @@ sub notify {
               if $GDEBUG;
 	       $self->start;
         }
+	if ( $self->{state} == $STATE_RUNNING )
+	{
+	  print '1'; 
+	   $self->{posy} += 1 if $event->isa('Event::Tick');
+		
+	}
     }
 
     #if we did not have a tick event then some other controller needs to do

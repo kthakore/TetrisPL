@@ -276,6 +276,7 @@ our @palette =
 	(SDL::Color->new( -r => 247, -g =>202,  -b =>0  )),
 	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46 )),
 	(SDL::Color->new( -r => 237, -g =>0,    -b =>142)),
+	(SDL::Color->new( -r => 50,  -g =>60,   -b =>50 )),
 );
 
 sub new {
@@ -301,61 +302,48 @@ sub init {
         -title  => 'Tetris',
 	-init   => SDL_INIT_VIDEO 
     ));
-	
-	$self->{background} =  SDL::Rect->new( -x => 0, -y => 0, 
-	-w => $self->app->width, -h => $self->app->height);
-	my $color = $palette[0];
-	$self->app->fill($self->{background},  $color );
-	
-	
+	$self->clear();
+}
+
+sub clear
+{
+	my $self = shift;
+	$self->draw_rectangle ( 0, 0, $self->app->width, $self->app->height, $palette[0]);
 }
 
 sub show_grid
 {
 	my $self = shift;
-	
-	#my $w = $self->app->width * (24/32); 
-	#my $h = $self->app->height * (30/32); 
-	#my $x = $self->app->width * (1/32);
-	#my $y = $self->app->height * (1/32);
-	
+
 #     // Calculate the limits of the board in pixels  
-     my $x1 = $self->{grid}->{block_size} - ($self->{grid}->{block_size}* ($self->{grid}->{width}  / 2)) - 1;  
+     my $x1 = $self->app->width - ($self->{grid}->{block_size} * ($self->{grid}->{width}  / 2)) - 1;  
      my $x2 = $self->{grid}->{block_size} + ($self->{grid}->{block_size}* ($self->{grid}->{width} / 2));  
      my $y = $self->{app}->height - ($self->{grid}->{block_size}* $self->{grid}->{height});  
+
+     $self->draw_rectangle ($x1 - $self->{grid}->{board_line_width},$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
 #   
-#     // Check that the vertical margin is not to small  
-#     //assert (mY > MIN_VERTICAL_MARGIN);  
-#   
-#     // Rectangles that delimits the board  
-     $self->draw_rectangle ($x1 - $self->{grid}->{board_line_width},$y, $x1, $self->app->height - 1, $palette[0]);  
-#   
-     $self->draw_rectangle ($x2,$y,$x2 + $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[0]);  
-#   
-#     // Check that the horizontal margin is not to small  
-#     //assert (mX1 > MIN_HORIZONTAL_MARGIN);  
-#   
-#     // Drawing the blocks that are already stored in the board  
-    $x1 += 1;  
-	my $color = $palette[4];;
-     for (my $i = 0; $i < $self->{grid}->{width}; $i++)  
+     $self->draw_rectangle ($x2,$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
+
+    $x1 -= ($self->{grid}->{board_line_width} *3) +5;  
+	my $color = $palette[4];
+     for (my $i = 0; $i < ($self->{grid}->{width}*3); $i++)  
      {  
          for (my $j = 0; $j < $self->{grid}->{height}; $j++)  
          {  
 #             // Check if the block is filled, if so, draw it  
              if (!$self->{grid}->is_free_loc($i, $j))  
 			 {  
-				$color = $palette[4];
+				$color = $palette[5];
 			 }
 			 else
 			 {
-				$color = $palette[1];
+				$color = $palette[6];
 			 }
-                 $self->draw_rectangle ($x1 + $i * $self->{grid}->{block_size},  
+                 $self->draw_rectangle ($self->app->width - $x1 + ($i *  $self->{grid}->{block_size}),  
                                         $y + $j * $self->{grid}->{block_size},  
                                          $self->{grid}->{block_size}- 1,  
                                          $self->{grid}->{block_size}- 1,  
-                                         $palette[4]);  
+                                         $color);  
 			 
          }  
      }  
@@ -449,6 +437,7 @@ sub notify {
 		}
         if ( $event->isa('Event::GameStart') ) {
             print "Starting Game \n" if $GDEBUG;
+			
 			$self->{game} = $event->game;
 		    $self->draw_scene() if $self->{grid};
 		    #die;
@@ -457,6 +446,7 @@ sub notify {
       
         if ( $event->isa('Event::CharactorMove') ) {
             print "Moving charactor sprite in view\n";
+			$self->clear();
 			$self->draw_scene() if ($self->{grid} && $self->{grid} );
 			$self->app->sync();
         }
@@ -520,11 +510,11 @@ sub init_grid
 	$self->{pieceRotation} = int(rand(3)); # 0 1 2 3 rotations
 	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
 	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
-	
+
 	#     //  Next piece  
      $self->{next_piece} = int(rand(6));   
      $self->{next_rotation}   = int(rand(3));
-     $self->{next_posx} = $self->grid->{width} + 5;
+     $self->{next_posx} = ($self->grid->{width}) + 5;
      $self->{next_posy} = 5;
 }
 
@@ -533,7 +523,7 @@ sub create_new_piece
 	my $self = shift;
 	$self->{piece} = $self->{next_piece};
 	$self->{pieceRotation} = $self->{next_rotation};
-	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos( $self->{piece}, $self->{rotation} );
+	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos( $self->{piece}, $self->{pieceRotation} );
 	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 	
 	#     //  Next piece  
@@ -554,15 +544,41 @@ sub notify {
 	if ( $self->{state} == $STATE_RUNNING )
 	{
 	   #lets grab those move requests events
-	   if ( $event->isa('Request::CharactorMove') ) {
-            print "Move charactor sprite \n" ;
-			#$self->{posX++} if ($event->direction == $ROTATE_C);
-			#$self->{posX++} if ($event->direction == $ROTATE_CC);
-			$self->{posy}++ if ($event->direction == $DIRECTION_DOWN);
-			$self->{posx}-- if ($event->direction == $DIRECTION_LEFT);
-			$self->{posx}++ if ($event->direction == $DIRECTION_RIGHT);
+	   if (  $event->isa('Request::CharactorMove') ) {
+            print "Move charactor sprite \n" if $GDEBUG;
+			my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
+			($rot++ %4) if ($event->direction == $ROTATE_C);
+			($rot-- %4) if ($event->direction == $ROTATE_CC);
+			$my++ if ($event->direction == $DIRECTION_DOWN);
+			$mx-- if ($event->direction == $DIRECTION_LEFT);
+			$mx++ if ($event->direction == $DIRECTION_RIGHT);
+			
+			if($self->grid->is_possible_movement($mx, $my, $self->{piece}, $rot))
+			{
+			  ($self->{posx}, $self->{posy}, $self->{pieceRotation}) = ($mx, $my, $rot);
+				
 			$self->evt_manager->post(Event::CharactorMove->new());
+			}			
         }
+		if ( $event->isa('Event::Tick') )
+		{
+			if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation}))
+			{
+			$self->{posy}++;
+			$self->evt_manager->post(Event::CharactorMove->new());
+			}
+			else  
+			{  
+				
+			 $self->grid->store_piece( $self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
+             $self->create_new_piece();  
+			 $self->grid->delete_possible_lines;
+			 if($self->grid->is_game_over())
+			 {
+				$self->evt_manager->post(Event::Quit->new());
+			 }
+			}  
+		 }
 	   
 	}
     }
@@ -610,7 +626,6 @@ sub get_block_type
 }
 sub get_x_init_pos {
 	die 'expecting 2 arguments got: ' if ($#_ != 1);
-	
 	my($piece, $rotation) = @_;
 	return $Pieces::pieces_init[$piece][$rotation][0];
 }
@@ -653,10 +668,10 @@ sub init
    $self->{board_position} = 200;
    $self->{screen_height} = 480;
      
-   $self->{width} = 10;
+   $self->{width} = 20;
    $self->{height} = 20;
-   my $arr_ref = []; 
-   $self->grid( $arr_ref);
+   my $arr_ref = [  ]; 
+   $self->grid($arr_ref);
   
 }
 
@@ -665,11 +680,15 @@ sub store_piece
   my $self = shift;
   die 'Expecting 4 parameters'  if ($#_ != 3);
   my ($x, $y, $piece, $rotation) = @_;
+
   for( my $i1 = $x, my $i2 =0; $i1< $x + 5; $i1++, $i2++)
   {
 	  for( my $j1 = $y, my $j2 = 0; $j1 < $y + 5; $j1++, $j2++)
 	  {
-		  $self->grid->[$i1][$j1] = 1 if( get_block_type($piece, $rotation,$j2, $i2) != 0)
+		  if( !($i1 < 0 || $j1 < 0))
+		  {
+		  $self->grid->[$i1][$j1] = 1 if( Blocks::get_block_type($piece, $rotation,$j2, $i2) != 0)
+		  }
 	  }
   }
 }
@@ -679,8 +698,11 @@ sub is_game_over
 	my $self = shift;
 	for (my $i = 0; $i < $self->{width}; $i++)  
 	    {  
-		       return 1   if ( $self->grid->[$i][0] == 0);  
-            } 
+			if( defined $self->grid->[$i][0])
+			{
+		    return 1 if ( $self->grid->[$i][0] == 1);  
+			}
+        } 
 	return 0;
 }
 
@@ -707,8 +729,8 @@ sub delete_possible_lines
 		my $i =0;
 		while ($i < $self->{width} )
 		{
-		last	if ($self->grid->[$i][$j] != 1);  
-			            $i++; 
+		last	if !(defined($self->grid->[$i][$j]));  
+		$i++; 
 		}
 		$self->delete_line($j) if $i == $self->{width};
 	}
@@ -744,7 +766,7 @@ sub get_y_pos_in_pixels
 sub is_possible_movement
 {
 	my $self = shift;
-	die 'Expecting 4 parameters' if $#_ !=4;
+	die 'Expecting 4 parameters' if $#_ !=3;
   	my($x, $y, $piece, $rotation) = @_;
 
 	for(my $i1 = $x, my $i2 =0; $i1 < $x + 5; $i1++, $i2++)
@@ -754,12 +776,12 @@ sub is_possible_movement
 		#check if block goes outside limits
 		if( $i1 < 0 || $i1 > ($self->{width} -1) || $j1 > ($self->{height} -1) )
 		{
-			return 0 if(get_block_type($piece, $rotation, $j2, $i2) != 0 ) 
+			return 0 if(Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0 ) 
 		}
 		#check collision with blocks already on board
 		if($j1 >=0 )
 		{
-			return 0 if( (get_block_type($piece, $rotation, $j2, $i2) != 0) && !($self->is_free_loc($i1, $j1)) );
+			return 0 if( (Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0) && !($self->is_free_loc($i1, $j1)) );
 		}
 	   }
 	}

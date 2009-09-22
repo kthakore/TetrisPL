@@ -519,18 +519,18 @@ sub new {
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
     print "Game PREPARING ... \n" if $GDEBUG;
+     $self->init_grid;
+    $self->evt_manager->post(Event::GridBuilt->new($self->grid) );
 
     #$self->{player} =; For points, level so on
-    $self->grid ( Grid->new($self->evt_manager));
-	$self->evt_manager->post(Event::GridBuilt->new($self->grid) );
     return $self;
 }
 
 sub start {
     my $self = shift;
-    $self->init_grid;
+   
     $self->{state} = $STATE_RUNNING;
-    print "Game RUNNING \n" if $GDEBUG;
+    print "Game RUNNING \n" ;
     my $event = Event::GameStart->new($self);
     $self->evt_manager->post($event);
 }
@@ -538,6 +538,7 @@ sub start {
 sub init_grid
 {
 	my $self = shift;
+	$self->grid ( Grid->new($self->evt_manager));
 	$self->{piece} = int(rand(6)); # 0 1 2 3 4 5 6 Pieces
 	$self->{pieceRotation} = int(rand(3)); # 0 1 2 3 rotations
 	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
@@ -571,7 +572,8 @@ sub notify {
         if ( $self->{state} == $STATE_PREPARING ) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $GDEBUG;
-            $self->start;
+	      print "$self->{state} \n";
+	       $self->start;
         }
     }
 
@@ -664,9 +666,6 @@ sub init
    $self->{width} = 10;
    $self->{height} = 20;
    my $arr_ref = []; 
-   #print Dumper $arr_ref;
-   #print Dumper $arr_ref->[0];
-   #print Dumper $arr_ref->[0][0];
    $self->grid( $arr_ref);
   
 }

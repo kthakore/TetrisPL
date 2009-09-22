@@ -485,7 +485,7 @@ sub new {
 
     die 'Expects an Event::Manager'
       unless defined $event and $event->isa('Event::Manager');
-
+	$self->{level} = 0.5; 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
@@ -510,16 +510,16 @@ sub init_grid
 {
 	my $self = shift;
 	$self->grid ( Grid->new($self->evt_manager));
-	$self->{piece} = int(rand(6)); # 0 1 2 3 4 5 6 Pieces
-	$self->{pieceRotation} = int(rand(3)); # 0 1 2 3 rotations
+	$self->{piece} = int(rand(7)); # 0 1 2 3 4 5 6 Pieces
+	$self->{pieceRotation} = int(rand(4)); # 0 1 2 3 rotations
 	$self->{posx} = $self->grid->{width}/2 + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
 	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
 	#     //  Next piece  
-     $self->{next_piece} = int(rand(6));   
-     $self->{next_rotation}   = int(rand(3));
-     $self->{next_posx} = ($self->grid->{width}) + 5;
-     $self->{next_posy} = 5;
+     $self->{next_piece} = int(rand(7));   
+     $self->{next_rotation}   = int(rand(4));
+     $self->{next_posx} = ($self->grid->{width}) + 1;
+     $self->{next_posy} = 0;
 }
 
 sub create_new_piece
@@ -531,8 +531,8 @@ sub create_new_piece
 	$self->{posy} = Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 	
 	#     //  Next piece  
-     $self->{next_piece} = int(rand(6));   
-     $self->{next_rotation}   = int(rand(3));
+     $self->{next_piece} = int(rand(7));   
+     $self->{next_rotation}   = int(rand(4));
 }
 
 sub notify {
@@ -564,9 +564,10 @@ sub notify {
 			$self->evt_manager->post(Event::CharactorMove->new());
 			}			
         }
-		if ( $event->isa('Event::Tick') && ((time - $self->{wait}) > 0.5))
+		if ( $event->isa('Event::Tick') && ((time - $self->{wait}) > $self->{level}))
 		{
 		    $self->{wait} = time;
+			
 			if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation}))
 			{
 			$self->{posy}++;
@@ -577,7 +578,8 @@ sub notify {
 				
 			 $self->grid->store_piece( $self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
              $self->create_new_piece();  
-			 $self->grid->delete_possible_lines;
+			 
+			 $self->{level} -= (0.01)*$self->grid->delete_possible_lines;
 			 if($self->grid->is_game_over())
 			 {
 				#make this Event::GameOver
@@ -676,7 +678,12 @@ sub init
      
    $self->{width} = 20;
    $self->{height} = 20;
-   my $arr_ref = [  ]; 
+   my $arr_ref = [  ];
+  # used to test delete_line   
+  # for my $x (0..18) 
+  # {
+  #		$arr_ref->[$x][19] = 1;
+  #  }
    $self->grid($arr_ref);
   
 }
@@ -719,9 +726,10 @@ sub delete_line
     my $dline = shift;
     for (my $j = $dline; $j >0; $j--)
     {
-	 for (my $i = 0; $i < $self->{width}; $j++)  
+	
+	 for (my $i = 0; $i < $self->{width}; $i++)  
 	         {  
-			             $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
+			  $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
               } 
     }
 	return 1;
@@ -729,10 +737,13 @@ sub delete_line
 
 sub delete_possible_lines
 {
+	
 	my $self = shift;
 	my $deleted_lines = 0;
 	for (my $j=0; $j < $self->{height}; $j++ )
 	{
+		
+		
 		my $i =0;
 		while ($i < $self->{width} )
 		{

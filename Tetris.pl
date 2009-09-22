@@ -519,9 +519,8 @@ sub new {
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
     print "Game PREPARING ... \n" if $GDEBUG;
-     $self->init_grid;
+    $self->init_grid;
     $self->evt_manager->post(Event::GridBuilt->new($self->grid) );
-
     #$self->{player} =; For points, level so on
     return $self;
 }
@@ -530,7 +529,7 @@ sub start {
     my $self = shift;
    
     $self->{state} = $STATE_RUNNING;
-    print "Game RUNNING \n" ;
+    print "Game RUNNING \n" if $GDEBUG;
     my $event = Event::GameStart->new($self);
     $self->evt_manager->post($event);
 }
@@ -568,11 +567,10 @@ sub notify {
     print "Notify in GAME \n" if $EDEBUG;
     my ( $self, $event ) = (@_);
 
-    if ( defined $event && $event->isa('Event') ) {
+    if ( defined $event && $event->isa('Event') && !$event->isa('Event::GridBuilt') ) {
         if ( $self->{state} == $STATE_PREPARING ) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $GDEBUG;
-	      print "$self->{state} \n";
 	       $self->start;
         }
     }

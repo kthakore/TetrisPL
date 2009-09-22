@@ -72,7 +72,15 @@ sub new {
     return $self;
 }
 
+package Event::CharactorMove;
+use base 'Event';
 
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new;
+    $self->name('Charactor is Moving');
+    return $self;
+}
 
 package Request::CharactorMove;
 use base 'Event';
@@ -81,29 +89,8 @@ use Class::XSAccessor accessors => { direction => 'direction', };
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
+	$self->direction( $_[0] );
     $self->name('Charactor Move Request');
-    return $self;
-}
-
-package Event::CharactorPlace;
-use base 'Event';
-use Class::XSAccessor accessors => { charactor => 'charactor', };
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->name('Charactor Place Event');
-    return $self;
-}
-
-package Event::CharactorMove;
-use base 'Event';
-use Class::XSAccessor accessors => { charactor => 'charactor', };
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->name('Charactor Move Event');
     return $self;
 }
 
@@ -350,29 +337,26 @@ sub show_grid
 #   
 #     // Drawing the blocks that are already stored in the board  
     $x1 += 1;  
+	my $color = $palette[4];;
      for (my $i = 0; $i < $self->{grid}->{width}; $i++)  
      {  
          for (my $j = 0; $j < $self->{grid}->{height}; $j++)  
          {  
 #             // Check if the block is filled, if so, draw it  
              if (!$self->{grid}->is_free_loc($i, $j))  
+			 {  
+				$color = $palette[4];
+			 }
+			 else
 			 {
+				$color = $palette[1];
+			 }
                  $self->draw_rectangle ($x1 + $i * $self->{grid}->{block_size},  
                                         $y + $j * $self->{grid}->{block_size},  
                                          $self->{grid}->{block_size}- 1,  
                                          $self->{grid}->{block_size}- 1,  
                                          $palette[4]);  
-			 }
-			 else
-			 {
-			
-                 $self->draw_rectangle ($x1 + $i * $self->{grid}->{block_size},  
-                                        $y + $j * $self->{grid}->{block_size},  
-                                         $self->{grid}->{block_size}- 1,  
-                                         $self->{grid}->{block_size}- 1,  
-                                         $palette[1]);  
-
-			 }
+			 
          }  
      }  
 	
@@ -457,16 +441,12 @@ sub notify {
         if ( $event->isa('Event::Tick') ) {
             print "Update Game View \n" if $GDEBUG;
 			frame_rate(1) if $FPS;
-			$self->app->sync() if $self->{grid}
             #if we got a quit event that means we can stop running the game
         }
         if ( $event->isa('Event::GridBuilt') ) {
             print "Showing Grid \n" if $GDEBUG;
 			$self->{grid} = $event->grid;
-			#print Dumper $self->{grid};
-			
-			$self->app->sync();
-        }
+		}
         if ( $event->isa('Event::GameStart') ) {
             print "Starting Game \n" if $GDEBUG;
 			$self->{game} = $event->game;
@@ -474,12 +454,10 @@ sub notify {
 		    #die;
 			$self->app->sync();
         }
-        if ( $event->isa('Event::CharactorPlace') ) {
-            print "Placing charactor sprite \n" if $GDEBUG;
-			$self->app->sync();
-        }
+      
         if ( $event->isa('Event::CharactorMove') ) {
-            print "Moving chractor sprite \n" if $GDEBUG;
+            print "Moving charactor sprite in view\n";
+			$self->draw_scene() if ($self->{grid} && $self->{grid} );
 			$self->app->sync();
         }
     }
@@ -575,9 +553,17 @@ sub notify {
         }
 	if ( $self->{state} == $STATE_RUNNING )
 	{
-	  print '1'; 
-	   $self->{posy} += 1 if $event->isa('Event::Tick');
-		
+	   #lets grab those move requests events
+	   if ( $event->isa('Request::CharactorMove') ) {
+            print "Move charactor sprite \n" ;
+			#$self->{posX++} if ($event->direction == $ROTATE_C);
+			#$self->{posX++} if ($event->direction == $ROTATE_CC);
+			$self->{posy}++ if ($event->direction == $DIRECTION_DOWN);
+			$self->{posx}-- if ($event->direction == $DIRECTION_LEFT);
+			$self->{posx}++ if ($event->direction == $DIRECTION_RIGHT);
+			$self->evt_manager->post(Event::CharactorMove->new());
+        }
+	   
 	}
     }
 

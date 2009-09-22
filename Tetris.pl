@@ -677,7 +677,7 @@ sub init
    $self->{screen_height} = 480;
      
    $self->{width} = 20;
-   $self->{height} = 20;
+   $self->{height} = 29;
    my $arr_ref = [  ];
   # used to test delete_line   
   # for my $x (0..18) 

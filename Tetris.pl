@@ -316,15 +316,14 @@ sub show_grid
 	my $self = shift;
 
 #     // Calculate the limits of the board in pixels  
-     my $x1 = $self->app->width - ($self->{grid}->{block_size} * ($self->{grid}->{width}  / 2)) - 1;  
-     my $x2 = $self->{grid}->{block_size} + ($self->{grid}->{block_size}* ($self->{grid}->{width} / 2));  
+     my $x1 = $self->{grid}->get_x_pos_in_pixels(0);  
+     my $x2 = $self->{grid}->get_x_pos_in_pixels($self->{grid}->{width});  
      my $y = $self->{app}->height - ($self->{grid}->{block_size}* $self->{grid}->{height});  
 
      $self->draw_rectangle ($x1 - $self->{grid}->{board_line_width},$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
 #   
-     $self->draw_rectangle ($x2,$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
+     $self->draw_rectangle ($x2 ,$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
 
-    $x1 -= ($self->{grid}->{board_line_width}) +5;  
 	my $color = $palette[4];
      for (my $i = 0; $i < ($self->{grid}->{width}); $i++)  
      {  
@@ -339,8 +338,8 @@ sub show_grid
 			 {
 				$color = $palette[6];
 			 }
-                 $self->draw_rectangle ($self->app->width - $x1 + ($i *  $self->{grid}->{block_size}),  
-                                        $y + $j * $self->{grid}->{block_size},  
+                 $self->draw_rectangle ($self->{grid}->get_x_pos_in_pixels($i),  
+                                        $self->{grid}->get_y_pos_in_pixels($j),  
                                          $self->{grid}->{block_size}- 1,  
                                          $self->{grid}->{block_size}- 1,  
                                          $color);  
@@ -367,8 +366,11 @@ sub show_charactor  # peice
         {  
 #             // Get the type of the block and draw it with the correct color  
 			my $type = Blocks::get_block_type ($piece, $rotation, $j, $i);
+			if ( defined $type )
+			{
               $piece_color = $palette[2] if($type == 1);
 			  $piece_color = $palette[3] if($type == 2);
+			  }
              if ($type != 0)  
 				{	my $block_size = $self->{grid}->{block_size};
 					$self->draw_rectangle ( $pixels_x + $i * $block_size,  
@@ -464,6 +466,7 @@ sub notify {
 package Controller::Game;
 use Class::XSAccessor accessors => { evt_manager => 'evt_manager', grid => 'grid' };
 use Data::Dumper;
+use Time::HiRes qw/time/;
 use Readonly;
 BEGIN
 {
@@ -482,7 +485,7 @@ sub new {
 
     die 'Expects an Event::Manager'
       unless defined $event and $event->isa('Event::Manager');
-
+	$self->{level} = 0.5; 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
@@ -500,6 +503,7 @@ sub start {
     print "Game RUNNING \n" if $GDEBUG;
     my $event = Event::GameStart->new($self);
     $self->evt_manager->post($event);
+	$self->{wait} = time;
 }
 
 sub init_grid
@@ -534,7 +538,7 @@ sub create_new_piece
 sub notify {
     print "Notify in GAME \n" if $EDEBUG;
     my ( $self, $event ) = (@_);
-
+	
     if ( defined $event && $event->isa('Event') && !$event->isa('Event::GridBuilt') ) {
         if ( $self->{state} == $STATE_PREPARING ) {
             print "Event " . $event->name . "caught to start Game  \n"
@@ -547,8 +551,8 @@ sub notify {
 	   if (  $event->isa('Request::CharactorMove') ) {
             print "Move charactor sprite \n" if $GDEBUG;
 			my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
-			$rot++ if ($event->direction == $ROTATE_C);
-			$rot--  if ($event->direction == $ROTATE_CC);
+			if ($event->direction == $ROTATE_C) { $rot++; $rot = $rot%4 };
+			if ($event->direction == $ROTATE_CC) { $rot--; $rot = $rot%4 };
 			$my++ if ($event->direction == $DIRECTION_DOWN);
 			$mx-- if ($event->direction == $DIRECTION_LEFT);
 			$mx++ if ($event->direction == $DIRECTION_RIGHT);
@@ -560,8 +564,10 @@ sub notify {
 			$self->evt_manager->post(Event::CharactorMove->new());
 			}			
         }
-		if ( $event->isa('Event::Tick') )
+		if ( $event->isa('Event::Tick') && ((time - $self->{wait}) > $self->{level}))
 		{
+		    $self->{wait} = time;
+			
 			if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation}))
 			{
 			$self->{posy}++;
@@ -572,9 +578,11 @@ sub notify {
 				
 			 $self->grid->store_piece( $self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
              $self->create_new_piece();  
-			 $self->grid->delete_possible_lines;
+			 
+			 $self->{level} -= (0.01)*$self->grid->delete_possible_lines;
 			 if($self->grid->is_game_over())
 			 {
+				#make this Event::GameOver
 				$self->evt_manager->post(Event::Quit->new());
 			 }
 			}  
@@ -665,12 +673,17 @@ sub init
   #TODO: Get the following from @_
    $self->{board_line_width} = 6;
    $self->{block_size} = 16;
-   $self->{board_position} = 200;
+   $self->{board_position} = 300;
    $self->{screen_height} = 480;
      
    $self->{width} = 20;
    $self->{height} = 20;
-   my $arr_ref = [  ]; 
+   my $arr_ref = [  ];
+  # used to test delete_line   
+  # for my $x (0..18) 
+  # {
+  #		$arr_ref->[$x][19] = 1;
+  #  }
    $self->grid($arr_ref);
   
 }
@@ -713,9 +726,10 @@ sub delete_line
     my $dline = shift;
     for (my $j = $dline; $j >0; $j--)
     {
-	 for (my $i = 0; $i < $self->{width}; $j++)  
+	
+	 for (my $i = 0; $i < $self->{width}; $i++)  
 	         {  
-			             $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
+			  $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
               } 
     }
 	return 1;
@@ -723,10 +737,13 @@ sub delete_line
 
 sub delete_possible_lines
 {
+	
 	my $self = shift;
 	my $deleted_lines = 0;
 	for (my $j=0; $j < $self->{height}; $j++ )
 	{
+		
+		
 		my $i =0;
 		while ($i < $self->{width} )
 		{
@@ -754,7 +771,7 @@ sub get_x_pos_in_pixels
 {
 	my $self = shift;
 	die 'Expecting 1 parameter got '.$_[0] if ( !defined ($_[0] ));
-	return  (($self->{board_position} - ($self->{block_size} * ($self->{width} /2)) ) +($_[0] * $self->{block_size} ) );
+	return  (($self->{board_position} - ($self->{block_size} * ($self->{width} /2)) ) +($_[0] * $self->{block_size} ) + 3);
 }
 
 sub get_y_pos_in_pixels

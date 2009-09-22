@@ -485,7 +485,7 @@ sub new {
 
     die 'Expects an Event::Manager'
       unless defined $event and $event->isa('Event::Manager');
-	$self->{level} = 0.5; 
+
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
@@ -564,10 +564,9 @@ sub notify {
 			$self->evt_manager->post(Event::CharactorMove->new());
 			}			
         }
-		if ( $event->isa('Event::Tick') && ((time - $self->{wait}) > $self->{level}))
+		if ( $event->isa('Event::Tick') && ((time - $self->{wait}) > 0.5))
 		{
 		    $self->{wait} = time;
-			
 			if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation}))
 			{
 			$self->{posy}++;
@@ -578,8 +577,7 @@ sub notify {
 				
 			 $self->grid->store_piece( $self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
              $self->create_new_piece();  
-			 
-			 $self->{level} -= (0.01)*$self->grid->delete_possible_lines;
+			 $self->grid->delete_possible_lines;
 			 if($self->grid->is_game_over())
 			 {
 				#make this Event::GameOver
@@ -678,12 +676,7 @@ sub init
      
    $self->{width} = 20;
    $self->{height} = 20;
-   my $arr_ref = [  ];
-  # used to test delete_line   
-  # for my $x (0..18) 
-  # {
-  #		$arr_ref->[$x][19] = 1;
-  #  }
+   my $arr_ref = [  ]; 
    $self->grid($arr_ref);
   
 }
@@ -726,10 +719,9 @@ sub delete_line
     my $dline = shift;
     for (my $j = $dline; $j >0; $j--)
     {
-	
-	 for (my $i = 0; $i < $self->{width}; $i++)  
+	 for (my $i = 0; $i < $self->{width}; $j++)  
 	         {  
-			  $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
+			             $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
               } 
     }
 	return 1;
@@ -737,13 +729,10 @@ sub delete_line
 
 sub delete_possible_lines
 {
-	
 	my $self = shift;
 	my $deleted_lines = 0;
 	for (my $j=0; $j < $self->{height}; $j++ )
 	{
-		
-		
 		my $i =0;
 		while ($i < $self->{width} )
 		{

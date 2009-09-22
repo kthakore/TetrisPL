@@ -271,7 +271,7 @@ use SDL::App;
 our @palette =
 (
 	(SDL::Color->new( -r => 50,  -g =>50,   -b =>60 )),
-	(SDL::Color->new( -r => 70,   -g =>191,  -b =>247)),
+	(SDL::Color->new( -r => 70,   -g =>191, -b =>247)),
 	(SDL::Color->new( -r => 0,   -g =>148,  -b =>217)),
 	(SDL::Color->new( -r => 247, -g =>202,  -b =>0  )),
 	(SDL::Color->new( -r => 0,   -g =>214,  -b =>46 )),
@@ -324,9 +324,9 @@ sub show_grid
 #   
      $self->draw_rectangle ($x2,$y, $self->{grid}->{board_line_width}, $self->app->height - 1, $palette[3]);  
 
-    $x1 -= ($self->{grid}->{board_line_width} *3) +5;  
+    $x1 -= ($self->{grid}->{board_line_width}) +5;  
 	my $color = $palette[4];
-     for (my $i = 0; $i < ($self->{grid}->{width}*3); $i++)  
+     for (my $i = 0; $i < ($self->{grid}->{width}); $i++)  
      {  
          for (my $j = 0; $j < $self->{grid}->{height}; $j++)  
          {  
@@ -445,7 +445,7 @@ sub notify {
         }
       
         if ( $event->isa('Event::CharactorMove') ) {
-            print "Moving charactor sprite in view\n";
+            print "Moving charactor sprite in view\n" if $GDEBUG;
 			$self->clear();
 			$self->draw_scene() if ($self->{grid} && $self->{grid} );
 			$self->app->sync();
@@ -547,8 +547,8 @@ sub notify {
 	   if (  $event->isa('Request::CharactorMove') ) {
             print "Move charactor sprite \n" if $GDEBUG;
 			my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
-			($rot++ %4) if ($event->direction == $ROTATE_C);
-			($rot-- %4) if ($event->direction == $ROTATE_CC);
+			$rot++ if ($event->direction == $ROTATE_C);
+			$rot--  if ($event->direction == $ROTATE_CC);
 			$my++ if ($event->direction == $DIRECTION_DOWN);
 			$mx-- if ($event->direction == $DIRECTION_LEFT);
 			$mx++ if ($event->direction == $DIRECTION_RIGHT);
@@ -710,20 +710,21 @@ sub is_game_over
 sub delete_line
 {
     my $self = shift;
-    die 'Expected 1 parameters' if ($#_ != 1);
     my $dline = shift;
     for (my $j = $dline; $j >0; $j--)
     {
 	 for (my $i = 0; $i < $self->{width}; $j++)  
 	         {  
 			             $self->grid->[$i][$j] = $self->grid->[$i][$j-1];  
-                 } 
+              } 
     }
+	return 1;
 }
 
 sub delete_possible_lines
 {
 	my $self = shift;
+	my $deleted_lines = 0;
 	for (my $j=0; $j < $self->{height}; $j++ )
 	{
 		my $i =0;
@@ -732,8 +733,9 @@ sub delete_possible_lines
 		last	if !(defined($self->grid->[$i][$j]));  
 		$i++; 
 		}
-		$self->delete_line($j) if $i == $self->{width};
+		$deleted_lines += $self->delete_line($j) if $i == $self->{width};
 	}
+	return $deleted_lines;
 }
 
 sub is_free_loc 

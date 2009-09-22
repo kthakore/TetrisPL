@@ -185,10 +185,12 @@ sub notify {
         $self->event->poll;    #get the first one
         my $event_type = $self->event->type;
         $event_to_process = Event::Quit->new if $event_type == SDL_QUIT;
-        if ( $event_type == SDL_KEYDOWN ) {
+        if ( $event_type == SDL_KEYDOWN || ( defined $self->{key} && $self->{key} =~ 'down'  ) {
 
-            my $key = $self->event->key_name;
-            print $key. " pressed \n" if $KEYDEBUG;
+	$self->{key} = $self->event->key_name if !(defined $self->{key});
+						
+            my $key = $self->{key} ;
+	    print $key. " pressed \n" if $KEYDEBUG;
 
             #This process the only keys we care about right now
             #later on we will add more stuff
@@ -205,7 +207,10 @@ sub notify {
             $event_to_process = Request::CharactorMove->new($DIRECTION_RIGHT)
               if $key =~ 'right';
         }
-
+	if ( $event_type == SDL_KEYUP )
+	{
+	$self->{key} = undef;
+	}
         #lets send the new events to be process back the event manager
         $self->evt_manager->post($event_to_process)
           if defined $event_to_process;

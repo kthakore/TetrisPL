@@ -728,12 +728,12 @@ sub init {
 
     #TODO: Get the following from @_
     $self->{board_line_width} = 6;
-    $self->{block_size}       = 16;
+    $self->{block_size}       = 20;
     $self->{board_position}   = 300;
     $self->{screen_height}    = 480;
 
-    $self->{width}  = 20;
-    $self->{height} = 29;
+    $self->{width}  = 10;
+    $self->{height} = 23;
     my $arr_ref = [];
 
     # used to test delete_line

@@ -16,61 +16,6 @@ our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 our $frame_rate = 0;
 our $time       = time;
 
-package SDL::Tutorial::Tetris::Event::Manager;
-use Data::Dumper;
-
-sub new {
-    my $class = shift;
-    my $self  = {
-        listeners => {},
-        evt_queue => [],
-    };
-    bless $self, $class;
-    return $self;
-}
-
-sub listeners : lvalue {
-    return shift->{listeners};
-}
-
-sub evt_queue : lvalue {
-    return shift->{evt_queue};
-}
-
-sub reg_listener {
-    my ($self, $listener) = (@_);
-    $self->listeners->{$listener} = $listener
-      if defined $listener;
-
-    return $self->listeners->{$listener};
-}
-
-sub un_reg_listener {
-    my ($self, $listener) = (@_);
-
-    if (defined $listener) {
-        return delete $self->listeners->{\$listener};
-    }
-    else {
-        return;
-    }
-}
-
-sub post {
-    my $self = shift;
-    my $event = shift if (@_) or die "Post needs a TickEvent";
-    print 'Event' . $event->name . "notified\n" if $EDEBUG;
-    die "Post needs a Event as parameter"
-      unless $event->isa('SDL::Tutorial::Tetris::Event');
-
-#print 'Event' . $event->name ." called \n" if (!$event->isa('SDL::Tutorial::Tetris::Event::Tick') && $EFDEBUG);
-
-    foreach my $listener (values %{$self->listeners}) {
-        $listener->notify($event);
-    }
-
-
-}
 
 ##################################################
 #Here comes the code for the actual game objects #

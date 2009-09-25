@@ -9,8 +9,8 @@ use Data::Dumper;
 use Time::HiRes qw/time/;
 use Readonly;
 
-use SDL::Tutorial::Tetris::Grid;
-use SDL::Tutorial::Tetris::Blocks;
+use SDL::Tutorial::Tetris::Model::Grid;
+use SDL::Tutorial::Tetris::Model::Blocks;
 use SDL::Tutorial::Tetris::Event;
 
 Readonly my $STATE_PREPARING => 0;
@@ -47,14 +47,14 @@ sub start {
 
 sub init_grid {
     my $self = shift;
-    $self->grid(SDL::Tutorial::Tetris::Grid->new($self->evt_manager));
+    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new($self->evt_manager));
     $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
     $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
     $self->{posx} =
       $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
     $self->{posy} =
-      SDL::Tutorial::Tetris::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
     #     //  Next piece
     $self->{next_piece}    = int(rand(7));
@@ -69,9 +69,9 @@ sub create_new_piece {
     $self->{pieceRotation} = $self->{next_rotation};
     $self->{posx} =
       $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
     $self->{posy} =
-      SDL::Tutorial::Tetris::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
     #     //  Next piece
     $self->{next_piece}    = int(rand(7));

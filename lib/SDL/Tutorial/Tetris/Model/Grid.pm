@@ -1,4 +1,4 @@
-package SDL::Tutorial::Tetris::Grid;
+package SDL::Tutorial::Tetris::Model::Grid;
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ use Class::XSAccessor accessors => {
     grid        => 'grid'
 };
 
-use SDL::Tutorial::Tetris::Blocks;
+use SDL::Tutorial::Tetris::Model::Blocks;
 
 sub new {
     my ($class, $event) = (@_);
@@ -60,7 +60,7 @@ sub store_piece {
             if (!($i1 < 0 || $j1 < 0)) {
                 $self->grid->[$i1][$j1] = 1
                   if (
-                    SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
             }
         }
     }
@@ -152,14 +152,14 @@ sub is_possible_movement {
             {
                 return 0
                   if (
-                    SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
             }
 
             #check collision with blocks already on board
             if ($j1 >= 0) {
                 return 0
                   if (
-                    (SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0)
+                    (SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0)
                     && !($self->is_free_loc($i1, $j1)));
             }
         }

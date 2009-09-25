@@ -1,7 +1,11 @@
+#!/usr/bin/perl
+
 use strict;
 use warnings;
+
 use Data::Dumper;
 use Readonly;
+
 Readonly my $ROTATE_C        => 0;    # rotates blocks ClockWise
 Readonly my $ROTATE_CC       => 1;    # rotates blocks CounterClockWise
 Readonly my $DIRECTION_DOWN  => 2;    # Drops the block
@@ -10,13 +14,11 @@ Readonly my $DIRECTION_RIGHT => 4;    # move right
 
 our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 
-
 our $frame_rate = 0;
 our $time       = time;
 
-
 #Event Super Class
-package Event;
+package SDL::Tutorial::Tetris::Event;
 use Class::XSAccessor accessors => {name => 'name',};
 
 sub new {
@@ -27,8 +29,8 @@ sub new {
     return $self;
 }
 
-package Event::Tick;
-use base 'Event';
+package SDL::Tutorial::Tetris::Event::Tick;
+use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {
     my $class = shift;
@@ -37,8 +39,8 @@ sub new {
     return $self;
 }
 
-package Event::Quit;
-use base 'Event';
+package SDL::Tutorial::Tetris::Event::Quit;
+use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {
     my $class = shift;
@@ -47,8 +49,8 @@ sub new {
     return $self;
 }
 
-package Event::GridBuilt;    #Tetris has a grid
-use base 'Event';
+package SDL::Tutorial::Tetris::Event::GridBuilt;    #Tetris has a grid
+use base 'SDL::Tutorial::Tetris::Event';
 use Data::Dumper;
 use Class::XSAccessor accessors => {grid => 'grid'};
 
@@ -60,8 +62,8 @@ sub new {
     return $self;
 }
 
-package Event::GameStart;
-use base 'Event';
+package SDL::Tutorial::Tetris::Event::GameStart;
+use base 'SDL::Tutorial::Tetris::Event';
 use Class::XSAccessor accessors => {game => 'game',};
 
 sub new {
@@ -72,8 +74,8 @@ sub new {
     return $self;
 }
 
-package Event::CharactorMove;
-use base 'Event';
+package SDL::Tutorial::Tetris::Event::CharactorMove;
+use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {
     my $class = shift;
@@ -82,8 +84,8 @@ sub new {
     return $self;
 }
 
-package Request::CharactorMove;
-use base 'Event';
+package SDL::Tutorial::Tetris::Request::CharactorMove;
+use base 'SDL::Tutorial::Tetris::Event';
 use Class::XSAccessor accessors => {direction => 'direction',};
 
 sub new {
@@ -95,7 +97,7 @@ sub new {
 }
 
 #---------------------------
-package Event::Manager;
+package SDL::Tutorial::Tetris::Event::Manager;
 use Data::Dumper;
 
 sub new {
@@ -140,9 +142,9 @@ sub post {
     my $event = shift if (@_) or die "Post needs a TickEvent";
     print 'Event' . $event->name . "notified\n" if $EDEBUG;
     die "Post needs a Event as parameter"
-      unless $event->isa('Event');
+      unless $event->isa('SDL::Tutorial::Tetris::Event');
 
-#print 'Event' . $event->name ." called \n" if (!$event->isa('Event::Tick') && $EFDEBUG);
+#print 'Event' . $event->name ." called \n" if (!$event->isa('SDL::Tutorial::Tetris::Event::Tick') && $EFDEBUG);
 
     foreach my $listener (values %{$self->listeners}) {
         $listener->notify($event);
@@ -151,7 +153,7 @@ sub post {
 
 }
 
-package Controller::Keyboard;
+package SDL::Tutorial::Tetris::Controller::Keyboard;
 use Class::XSAccessor accessors =>
   {event => 'event', evt_manager => 'evt_manager'};
 use SDL;
@@ -162,8 +164,8 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    die 'Expects an Event::Manager'
-      unless defined $event && $event->isa('Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
+      unless defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Manager');
 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
@@ -174,7 +176,7 @@ sub notify {
     print "Notify in C::KB \n" if $EDEBUG;
     my ($self, $event) = (@_);
 
-    if (defined $event and $event->isa('Event::Tick')) {
+    if (defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
 
         #if we got a tick event that means we are starting
         #a new iteration of game loop
@@ -184,7 +186,7 @@ sub notify {
         $self->event->pump;    #get events from SDL queue
         $self->event->poll;    #get the first one
         my $event_type = $self->event->type;
-        $event_to_process = Event::Quit->new if $event_type == SDL_QUIT;
+        $event_to_process = SDL::Tutorial::Tetris::Event::Quit->new if $event_type == SDL_QUIT;
         if ($event_type == SDL_KEYDOWN
             || (defined $self->{key} && $self->{key} =~ 'down'))
         {
@@ -197,17 +199,17 @@ sub notify {
 
             #This process the only keys we care about right now
             #later on we will add more stuff
-            $event_to_process = Event::Quit->new
+            $event_to_process = SDL::Tutorial::Tetris::Event::Quit->new
               if $key =~ 'escape';
-            $event_to_process = Request::CharactorMove->new($ROTATE_C)
+            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($ROTATE_C)
               if $key =~ 'up';
-            $event_to_process = Request::CharactorMove->new($ROTATE_CC)
+            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($ROTATE_CC)
               if $key =~ 'space';
-            $event_to_process = Request::CharactorMove->new($DIRECTION_DOWN)
+            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($DIRECTION_DOWN)
               if $key =~ 'down';
-            $event_to_process = Request::CharactorMove->new($DIRECTION_LEFT)
+            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($DIRECTION_LEFT)
               if $key =~ 'left';
-            $event_to_process = Request::CharactorMove->new($DIRECTION_RIGHT)
+            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($DIRECTION_RIGHT)
               if $key =~ 'right';
         }
         if ($event_type == SDL_KEYUP) {
@@ -225,7 +227,7 @@ sub notify {
     #now
 }
 
-package Controller::CPUSpinner;
+package SDL::Tutorial::Tetris::Controller::CPUSpinner;
 use Class::XSAccessor accessors => {evt_manager => 'evt_manager'};
 
 sub new {
@@ -233,8 +235,8 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    die 'Expects an Event::Manager'
-      unless defined $event and $event->isa('Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
@@ -245,7 +247,7 @@ sub new {
 sub run {
     my $self = shift;
     while ($self->{keep_going} == 1) {
-        my $tick = Event::Tick->new;
+        my $tick = SDL::Tutorial::Tetris::Event::Tick->new;
         $self->evt_manager->post($tick);
     }
 }
@@ -254,7 +256,7 @@ sub notify {
     print "Notify in CPU Spinner \n" if $EDEBUG;
     my ($self, $event) = (@_);
 
-    if (defined $event && $event->isa('Event::Quit')) {
+    if (defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Quit')) {
         print "Stopping to pump ticks \n" if $EDEBUG;
 
         #if we got a quit event that means we can stop running the game
@@ -270,7 +272,7 @@ sub notify {
 #Here comes the code for the actual game objects #
 ##################################################
 
-package View::Game;
+package SDL::Tutorial::Tetris::View::Game;
 use Class::XSAccessor accessors =>
   {evt_manager => 'evt_manager', app => 'app'};
 use Data::Dumper;
@@ -293,8 +295,8 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    die 'Expects an Event::Manager'
-      unless defined $event and $event->isa('Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
@@ -387,7 +389,7 @@ sub show_charactor    # peice
         for (my $j = 0; $j < 5; $j++) {
 
 #             // Get the type of the block and draw it with the correct color
-            my $type = Blocks::get_block_type($piece, $rotation, $j, $i);
+            my $type = SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j, $i);
             if (defined $type) {
                 $piece_color = $palette[2] if ($type == 1);
                 $piece_color = $palette[3] if ($type == 2);
@@ -454,17 +456,17 @@ sub notify {
     my ($self, $event) = (@_);
 
     if (defined $event) {
-        if ($event->isa('Event::Tick')) {
+        if ($event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
             print "Update Game View \n" if $GDEBUG;
             frame_rate(1) if $FPS;
 
             #if we got a quit event that means we can stop running the game
         }
-        if ($event->isa('Event::GridBuilt')) {
+        if ($event->isa('SDL::Tutorial::Tetris::Event::GridBuilt')) {
             print "Showing Grid \n" if $GDEBUG;
             $self->{grid} = $event->grid;
         }
-        if ($event->isa('Event::GameStart')) {
+        if ($event->isa('SDL::Tutorial::Tetris::Event::GameStart')) {
             print "Starting Game \n" if $GDEBUG;
 
             $self->{game} = $event->game;
@@ -474,7 +476,7 @@ sub notify {
             $self->app->sync();
         }
 
-        if ($event->isa('Event::CharactorMove')) {
+        if ($event->isa('SDL::Tutorial::Tetris::Event::CharactorMove')) {
             print "Moving charactor sprite in view\n" if $GDEBUG;
             $self->clear();
             $self->draw_scene() if ($self->{grid} && $self->{grid});
@@ -491,7 +493,7 @@ sub notify {
 #Here is the Tetris logic #
 ###########################
 
-package Controller::Game;
+package SDL::Tutorial::Tetris::Controller::Game;
 use Class::XSAccessor accessors =>
   {evt_manager => 'evt_manager', grid => 'grid'};
 use Data::Dumper;
@@ -512,15 +514,15 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    die 'Expects an Event::Manager'
-      unless defined $event and $event->isa('Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
     $self->{level} = 0.5;
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->{state} = $STATE_PREPARING;
     print "Game PREPARING ... \n" if $GDEBUG;
     $self->init_grid;
-    $self->evt_manager->post(Event::GridBuilt->new($self->grid));
+    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::GridBuilt->new($self->grid));
 
     #$self->{player} =; For points, level so on
     return $self;
@@ -531,21 +533,21 @@ sub start {
 
     $self->{state} = $STATE_RUNNING;
     print "Game RUNNING \n" if $GDEBUG;
-    my $event = Event::GameStart->new($self);
+    my $event = SDL::Tutorial::Tetris::Event::GameStart->new($self);
     $self->evt_manager->post($event);
     $self->{wait} = time;
 }
 
 sub init_grid {
     my $self = shift;
-    $self->grid(Grid->new($self->evt_manager));
+    $self->grid(SDL::Tutorial::Tetris::Grid->new($self->evt_manager));
     $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
     $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
     $self->{posx} =
       $self->grid->{width} / 2
-      + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+      + SDL::Tutorial::Tetris::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
     $self->{posy} =
-      Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+      SDL::Tutorial::Tetris::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
     #     //  Next piece
     $self->{next_piece}    = int(rand(7));
@@ -560,9 +562,9 @@ sub create_new_piece {
     $self->{pieceRotation} = $self->{next_rotation};
     $self->{posx} =
       $self->grid->{width} / 2
-      + Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+      + SDL::Tutorial::Tetris::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
     $self->{posy} =
-      Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+      SDL::Tutorial::Tetris::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
     #     //  Next piece
     $self->{next_piece}    = int(rand(7));
@@ -574,8 +576,8 @@ sub notify {
     my ($self, $event) = (@_);
 
     if (   defined $event
-        && $event->isa('Event')
-        && !$event->isa('Event::GridBuilt'))
+        && $event->isa('SDL::Tutorial::Tetris::Event')
+        && !$event->isa('SDL::Tutorial::Tetris::Event::GridBuilt'))
     {
         if ($self->{state} == $STATE_PREPARING) {
             print "Event " . $event->name . "caught to start Game  \n"
@@ -585,7 +587,7 @@ sub notify {
         if ($self->{state} == $STATE_RUNNING) {
 
             #lets grab those move requests events
-            if ($event->isa('Request::CharactorMove')) {
+            if ($event->isa('SDL::Tutorial::Tetris::Request::CharactorMove')) {
                 print "Move charactor sprite \n" if $GDEBUG;
                 my ($mx, $my, $rot) =
                   ($self->{posx}, $self->{posy}, $self->{pieceRotation});
@@ -609,10 +611,10 @@ sub notify {
                     ($self->{posx}, $self->{posy}, $self->{pieceRotation}) =
                       ($mx, $my, $rot);
 
-                    $self->evt_manager->post(Event::CharactorMove->new());
+                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::CharactorMove->new());
                 }
             }
-            if ($event->isa('Event::Tick')
+            if ($event->isa('SDL::Tutorial::Tetris::Event::Tick')
                 && ((time - $self->{wait}) > $self->{level}))
             {
                 $self->{wait} = time;
@@ -624,7 +626,7 @@ sub notify {
                   )
                 {
                     $self->{posy}++;
-                    $self->evt_manager->post(Event::CharactorMove->new());
+                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::CharactorMove->new());
                 }
                 else {
 
@@ -638,8 +640,8 @@ sub notify {
                       -= (0.01) * $self->grid->delete_possible_lines;
                     if ($self->grid->is_game_over()) {
 
-                        #make this Event::GameOver
-                        $self->evt_manager->post(Event::Quit->new());
+                        #make this SDL::Tutorial::Tetris::Event::GameOver
+                        $self->evt_manager->post(SDL::Tutorial::Tetris::Event::Quit->new());
                     }
                 }
             }
@@ -656,7 +658,7 @@ sub notify {
 #Game Objects
 #
 
-package Blocks;
+package SDL::Tutorial::Tetris::Blocks;
 use Data::Dumper;
 require Exporter;
 our @ISA    = qw/Exporter/;
@@ -664,7 +666,7 @@ our @EXPORT = qw/
   $SQUARE $LINE $L_SHAPE $L_MIRROR $N_SHAPE $N_MIRROR $T_SHAPE
   get_block_type get_x_init_pos get_y_init_pos
   /;
-use Pieces qw/@pieces/;
+use SDL::Tutorial::Tetris::Pieces qw/@pieces/;
 use Readonly;
 Readonly our $SQUARE   => 0;
 Readonly our $LINE     => 1;
@@ -684,23 +686,23 @@ sub new {
 sub get_block_type {
     die 'Expecting 4 arguments' if ($#_ != 3);
     my ($piece, $rotation, $x, $y) = @_;
-    return $Pieces::pieces[$piece][$rotation][$x][$y];
+    return $SDL::Tutorial::Tetris::Pieces::pieces[$piece][$rotation][$x][$y];
 }
 
 sub get_x_init_pos {
     die 'expecting 2 arguments got: ' if ($#_ != 1);
     my ($piece, $rotation) = @_;
-    return $Pieces::pieces_init[$piece][$rotation][0];
+    return $SDL::Tutorial::Tetris::Pieces::pieces_init[$piece][$rotation][0];
 }
 
 sub get_y_init_pos {
     die 'expecting 2 arguments' if ($#_ != 1);
     my ($piece, $rotation) = @_;
-    return $Pieces::pieces_init[$piece][$rotation][1];
+    return $SDL::Tutorial::Tetris::Pieces::pieces_init[$piece][$rotation][1];
 
 }
 
-package Grid;
+package SDL::Tutorial::Tetris::Grid;
 use Data::Dumper;
 use Class::XSAccessor accessors =>
   {evt_manager => 'evt_manager', blocks => 'blocks', grid => 'grid'};
@@ -714,8 +716,8 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    die 'Expects an Event::Manager'
-      unless defined $event and $event->isa('Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
@@ -755,7 +757,7 @@ sub store_piece {
             if (!($i1 < 0 || $j1 < 0)) {
                 $self->grid->[$i1][$j1] = 1
                   if (
-                    Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
             }
         }
     }
@@ -847,14 +849,14 @@ sub is_possible_movement {
             {
                 return 0
                   if (
-                    Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
             }
 
             #check collision with blocks already on board
             if ($j1 >= 0) {
                 return 0
                   if (
-                    (Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0)
+                    (SDL::Tutorial::Tetris::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0)
                     && !($self->is_free_loc($i1, $j1)));
             }
         }
@@ -868,7 +870,7 @@ sub notify {
     print "Notify in Grid \n" if $EDEBUG;
     my ($self, $event) = (@_);
 
-    if (defined $event && $event->isa('Event::Tick')) {
+    if (defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
 
         #do checks
 
@@ -878,10 +880,10 @@ sub notify {
 
 package main;    #On the go testing
 
-my $manager  = Event::Manager->new;
-my $keybd    = Controller::Keyboard->new($manager);
-my $spinner  = Controller::CPUSpinner->new($manager);
-my $gameView = View::Game->new($manager);
-my $game     = Controller::Game->new($manager);
+my $manager  = SDL::Tutorial::Tetris::Event::Manager->new;
+my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new($manager);
+my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new($manager);
+my $gameView = SDL::Tutorial::Tetris::View::Game->new($manager);
+my $game     = SDL::Tutorial::Tetris::Controller::Game->new($manager);
 
 $spinner->run;

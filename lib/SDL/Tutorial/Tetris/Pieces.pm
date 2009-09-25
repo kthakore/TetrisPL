@@ -1,11 +1,11 @@
 package SDL::Tutorial::Tetris::Pieces;
-#this should be Tetris::Pieces;
+
 use strict;
 use warnings;
+
 require Exporter;
 our @ISA = qw/Exporter/;
 our @EXPORT =  qw/@pieces @pieces_init/;
-
 
 our @pieces  =
 (

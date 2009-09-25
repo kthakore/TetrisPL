@@ -1,5 +1,10 @@
 package SDL::Tutorial::Tetris::Grid;
 
+use strict;
+use warnings;
+
+use base 'SDL::Tutorial::Tetris';
+
 use Data::Dumper;
 
 use Class::XSAccessor accessors => {
@@ -166,8 +171,9 @@ sub is_possible_movement {
 }
 
 sub notify {
-    print "Notify in Grid \n" if $EDEBUG;
     my ($self, $event) = (@_);
+
+    print "Notify in Grid \n" if $self->EDEBUG;
 
     if (defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
 

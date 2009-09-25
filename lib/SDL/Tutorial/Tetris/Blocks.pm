@@ -1,5 +1,8 @@
 package SDL::Tutorial::Tetris::Blocks;
 
+use strict;
+use warnings;
+
 use Data::Dumper;
 require Exporter;
 

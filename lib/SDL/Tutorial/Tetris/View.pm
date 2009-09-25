@@ -1,5 +1,8 @@
 package SDL::Tutorial::Tetris::View::Game;
 
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris';
 
 use Class::XSAccessor accessors => {
@@ -167,6 +170,9 @@ sub draw_rectangle {
 
 
 # Should be in Game::Utility
+my $frame_rate = 0;
+my $time       = time;
+
 sub frame_rate {
     my $secs = shift;
     $secs = 2 unless defined $secs;
@@ -184,22 +190,23 @@ sub frame_rate {
 }
 
 sub notify {
-    print "Notify in View Game \n" if $EDEBUG;
     my ($self, $event) = (@_);
+
+    print "Notify in View Game \n" if $self->EDEBUG;
 
     if (defined $event) {
         if ($event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
-            print "Update Game View \n" if $GDEBUG;
-            frame_rate(1) if $FPS;
+            print "Update Game View \n" if $self->GDEBUG;
+            frame_rate(1) if $self->FPS;
 
             #if we got a quit event that means we can stop running the game
         }
         if ($event->isa('SDL::Tutorial::Tetris::Event::GridBuilt')) {
-            print "Showing Grid \n" if $GDEBUG;
+            print "Showing Grid \n" if $self->GDEBUG;
             $self->{grid} = $event->grid;
         }
         if ($event->isa('SDL::Tutorial::Tetris::Event::GameStart')) {
-            print "Starting Game \n" if $GDEBUG;
+            print "Starting Game \n" if $self->GDEBUG;
 
             $self->{game} = $event->game;
             $self->draw_scene() if $self->{grid};
@@ -209,7 +216,7 @@ sub notify {
         }
 
         if ($event->isa('SDL::Tutorial::Tetris::Event::CharactorMove')) {
-            print "Moving charactor sprite in view\n" if $GDEBUG;
+            print "Moving charactor sprite in view\n" if $self->GDEBUG;
             $self->clear();
             $self->draw_scene() if ($self->{grid} && $self->{grid});
             $self->app->sync();

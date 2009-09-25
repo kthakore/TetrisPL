@@ -3,6 +3,8 @@ package SDL::Tutorial::Tetris::Blocks;
 use strict;
 use warnings;
 
+use base 'SDL::Tutorial::Tetris';
+
 use Data::Dumper;
 require Exporter;
 
@@ -22,13 +24,6 @@ Readonly our $L_MIRROR => 3;
 Readonly our $N_SHAPE  => 4;
 Readonly our $N_MIRROR => 5;
 Readonly our $T_SHAPE  => 6;
-
-sub new {
-    my $class = shift;
-    my $self  = {};
-    bless $self, $class;
-    return $self;
-}
 
 sub get_block_type {
     die 'Expecting 4 arguments' if ($#_ != 3);

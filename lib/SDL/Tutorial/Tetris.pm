@@ -29,28 +29,7 @@ BEGIN {
     %EXPORT_TAGS = ();
 }
 
-
-#################### subroutine header begin ####################
-
-=head2 sample_function
-
- Usage     : How to use this function/method
- Purpose   : What it does
- Returns   : What it returns
- Argument  : What it wants to know
- Throws    : Exceptions and other anomolies
- Comment   : This is a sample subroutine header.
-           : It is polite to include more pod and fewer comments.
-
-See Also   : 
-
-=cut
-
-#################### subroutine header end ####################
-
-
-sub new
-{
+sub new {
     my ($class, %parameters) = @_;
 
     my $self = bless ({}, ref ($class) || $class);
@@ -58,11 +37,9 @@ sub new
     return $self;
 }
 
+1;
 
-#################### main pod documentation begin ###################
-## Below is the stub of documentation for your module. 
-## You better edit it!
-
+__END__
 
 =head1 NAME
 
@@ -99,7 +76,6 @@ Blah blah blah.
 
     Kartik Thakore
     CPAN ID: KTHAKORE
-    none
     kthakore@CPAN.org
     http://yapgh.blogspot.com
 
@@ -115,12 +91,3 @@ LICENSE file included with this module.
 =head1 SEE ALSO
 
 perl(1).
-
-=cut
-
-#################### main pod documentation end ###################
-
-
-1;
-# The preceding line will help the module return a true value
-

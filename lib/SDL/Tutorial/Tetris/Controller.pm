@@ -22,8 +22,7 @@ use SDL::Event;
 
 sub new {
     my ($class, $event) = (@_);
-    my $self = {};
-    bless $self, $class;
+    my $self  = $class->SUPER::new();
 
     die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
       unless defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Manager');
@@ -97,8 +96,7 @@ use base 'SDL::Tutorial::Tetris::Controller';
 
 sub new {
     my ($class, $event) = (@_);
-    my $self = {};
-    bless $self, $class;
+    my $self  = $class->SUPER::new();
 
     die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
       unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
@@ -158,8 +156,7 @@ Readonly my $STATE_PAUSED    => 2;
 
 sub new {
     my ($class, $event) = (@_);
-    my $self = {};
-    bless $self, $class;
+    my $self  = $class->SUPER::new();
 
     die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
       unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');

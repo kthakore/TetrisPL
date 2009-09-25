@@ -3,15 +3,11 @@ package SDL::Tutorial::Tetris::Event;
 use strict;
 use warnings;
 
-use Class::XSAccessor accessors => {name => 'name',};
+use base 'SDL::Tutorial::Tetris';
 
-sub new {
-    my $class = shift;
-    my $self  = {};
-    bless $self, $class;
-    $self->name("Generic Event");
-    return $self;
-}
+use Class::XSAccessor accessors => {
+    name => 'name',
+};
 
 package SDL::Tutorial::Tetris::Event::Tick;
 
@@ -111,11 +107,11 @@ use base 'SDL::Tutorial::Tetris';
 
 sub new {
     my $class = shift;
-    my $self  = {
-        listeners => {},
-        evt_queue => [],
-    };
-    bless $self, $class;
+    my $self  = $class->SUPER::new();
+
+    $self->{listeners} = {};
+    $self->{evt_queue} = [];
+
     return $self;
 }
 

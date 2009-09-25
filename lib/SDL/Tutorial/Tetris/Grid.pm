@@ -17,8 +17,7 @@ use SDL::Tutorial::Tetris::Blocks;
 
 sub new {
     my ($class, $event) = (@_);
-    my $self = {};
-    bless $self, $class;
+    my $self  = $class->SUPER::new();
 
     die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
       unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');

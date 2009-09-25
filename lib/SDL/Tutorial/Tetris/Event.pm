@@ -1,5 +1,8 @@
 package SDL::Tutorial::Tetris::Event;
 
+use strict;
+use warnings;
+
 use Class::XSAccessor accessors => {name => 'name',};
 
 sub new {
@@ -11,6 +14,10 @@ sub new {
 }
 
 package SDL::Tutorial::Tetris::Event::Tick;
+
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {
@@ -21,6 +28,10 @@ sub new {
 }
 
 package SDL::Tutorial::Tetris::Event::Quit;
+
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {
@@ -30,7 +41,11 @@ sub new {
     return $self;
 }
 
-package SDL::Tutorial::Tetris::Event::GridBuilt;    #Tetris has a grid
+package SDL::Tutorial::Tetris::Event::GridBuilt;
+
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Event';
 use Data::Dumper;
 use Class::XSAccessor accessors => {grid => 'grid'};
@@ -44,6 +59,10 @@ sub new {
 }
 
 package SDL::Tutorial::Tetris::Event::GameStart;
+
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Event';
 use Class::XSAccessor accessors => {game => 'game',};
 
@@ -56,6 +75,10 @@ sub new {
 }
 
 package SDL::Tutorial::Tetris::Event::CharactorMove;
+
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Event';
 
 sub new {

@@ -1,5 +1,22 @@
 package SDL::Tutorial::Tetris;
+
 use strict;
+use warnings;
+
+# all the classes inherit these basic accessors:
+use Class::XSAccessor accessors => {
+    EDEBUG   => 'EDEBUG',
+    GDEBUG   => 'GDEBUG',
+    KEYDEBUG => 'KEYDEBUG',
+    FPS      => 'FPS',
+};
+
+# ...and those constants:
+sub ROTATE_C        { 0 }    # rotates blocks ClockWise
+sub ROTATE_CC       { 1 }    # rotates blocks CounterClockWise
+sub DIRECTION_DOWN  { 2 }    # Drops the block
+sub DIRECTION_LEFT  { 3 }    # move left
+sub DIRECTION_RIGHT { 4 }    # move right
 
 BEGIN {
     use Exporter ();

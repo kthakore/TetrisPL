@@ -6,8 +6,10 @@ use warnings;
 use lib './lib';
 
 use SDL::Tutorial::Tetris::Event;
-use SDL::Tutorial::Tetris::Controller;
 use SDL::Tutorial::Tetris::View;
+use SDL::Tutorial::Tetris::Controller::Keyboard;
+use SDL::Tutorial::Tetris::Controller::CPUSpinner;
+use SDL::Tutorial::Tetris::Controller::Game;
 
 use Data::Dumper;
 

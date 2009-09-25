@@ -11,6 +11,7 @@ use Readonly;
 
 use SDL::Tutorial::Tetris::Grid;
 use SDL::Tutorial::Tetris::Blocks;
+use SDL::Tutorial::Tetris::Event;
 
 Readonly my $STATE_PREPARING => 0;
 Readonly my $STATE_RUNNING   => 1;
@@ -20,8 +21,8 @@ sub new {
     my ($class, $event) = (@_);
     my $self  = $class->SUPER::new();
 
-    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
-      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::EventManager'
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::EventManager');
     $self->{level} = 0.5;
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);

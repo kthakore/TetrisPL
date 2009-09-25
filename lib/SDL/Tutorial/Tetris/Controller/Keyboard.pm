@@ -12,8 +12,8 @@ sub new {
     my ($class, $event) = (@_);
     my $self  = $class->SUPER::new();
 
-    die 'Expects an SDL::Tutorial::Tetris::Event::Manager'
-      unless defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Manager');
+    die 'Expects an SDL::Tutorial::Tetris::EventManager'
+      unless defined $event && $event->isa('SDL::Tutorial::Tetris::EventManager');
 
     $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);

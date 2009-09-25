@@ -5,7 +5,7 @@ use warnings;
 
 use lib './lib';
 
-use SDL::Tutorial::Tetris::Event;
+use SDL::Tutorial::Tetris::EventManager;
 use SDL::Tutorial::Tetris::View;
 use SDL::Tutorial::Tetris::Controller::Keyboard;
 use SDL::Tutorial::Tetris::Controller::CPUSpinner;
@@ -15,7 +15,7 @@ use Data::Dumper;
 
 our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 
-my $manager  = SDL::Tutorial::Tetris::Event::Manager->new;
+my $manager  = SDL::Tutorial::Tetris::EventManager->new;
 my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new($manager);
 my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new($manager);
 my $gameView = SDL::Tutorial::Tetris::View::Game->new($manager);

@@ -88,4 +88,20 @@ sub new {
     return $self;
 }
 
+package SDL::Tutorial::Tetris::Request::CharactorMove;
+
+use base 'SDL::Tutorial::Tetris::Event';
+
+use Class::XSAccessor accessors => {
+    direction => 'direction',
+};
+
+sub new {
+    my $class = shift;
+    my $self  = $class->SUPER::new;
+    $self->direction($_[0]);
+    $self->name('Charactor Move Request');
+    return $self;
+}
+
 1;

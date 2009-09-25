@@ -16,21 +16,6 @@ our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 our $frame_rate = 0;
 our $time       = time;
 
-#Event Super Class
-
-package SDL::Tutorial::Tetris::Request::CharactorMove;
-use base 'SDL::Tutorial::Tetris::Event';
-use Class::XSAccessor accessors => {direction => 'direction',};
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->direction($_[0]);
-    $self->name('Charactor Move Request');
-    return $self;
-}
-
-#---------------------------
 package SDL::Tutorial::Tetris::Event::Manager;
 use Data::Dumper;
 

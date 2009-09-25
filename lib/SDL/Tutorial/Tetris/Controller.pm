@@ -149,10 +149,8 @@ use Data::Dumper;
 use Time::HiRes qw/time/;
 use Readonly;
 
-BEGIN {
-    Grid->import;
-    Blocks->import;
-}
+use SDL::Tutorial::Tetris::Grid;
+use SDL::Tutorial::Tetris::Blocks;
 
 Readonly my $STATE_PREPARING => 0;
 Readonly my $STATE_RUNNING   => 1;

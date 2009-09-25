@@ -1,4 +1,4 @@
-package Pieces;
+package SDL::Tutorial::Tetris::Pieces;
 #this should be Tetris::Pieces;
 use strict;
 use warnings;

@@ -26,22 +26,6 @@ sub new {
     return $self;
 }
 
-package SDL::Tutorial::Tetris::Event::GameStart;
-
-use strict;
-use warnings;
-
-use base 'SDL::Tutorial::Tetris::Event';
-use Class::XSAccessor accessors => {game => 'game',};
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->name('GameStart');
-    $self->game($_[0]);
-    return $self;
-}
-
 package SDL::Tutorial::Tetris::Event::CharactorMoveRequest;
 
 use base 'SDL::Tutorial::Tetris::Event';

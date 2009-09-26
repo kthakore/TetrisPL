@@ -43,7 +43,7 @@ sub start {
 
     $self->{state} = $STATE_RUNNING;
     print "Game RUNNING \n" if $self->GDEBUG;
-    my $event = SDL::Tutorial::Tetris::Event::GameStart->new($self);
+    my $event = SDL::Tutorial::Tetris::Event->new( name => 'GameStart', game => $self );
     $self->evt_manager->post($event);
     $self->{wait} = time;
 }

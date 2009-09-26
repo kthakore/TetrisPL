@@ -206,7 +206,7 @@ sub notify {
         if ($event->name eq 'GameStart') {
             print "Starting Game \n" if $self->GDEBUG;
 
-            $self->{game} = $event->game;
+            $self->{game} = $event->{game};
             $self->draw_scene() if $self->{grid};
 
             #die;

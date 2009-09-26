@@ -5,24 +5,17 @@ use warnings;
 
 use base 'SDL::Tutorial::Tetris::Controller';
 
-sub new {
-    my ($class, %params) = (@_);
-
-    my $self  = $class->SUPER::new(%params);
-
-    $self->evt_manager->reg_listener($self);
-
-    $self->{keep_going} ||= 1;
-
-    return $self;
-}
-
 sub run {
     my $self = shift;
     while ($self->{keep_going} == 1) {
         my $tick = SDL::Tutorial::Tetris::Event->new( name => 'Tick' );
         $self->evt_manager->post($tick);
     }
+}
+
+sub init {
+    my $self = shift;
+    $self->{keep_going} ||= 1;
 }
 
 sub notify {

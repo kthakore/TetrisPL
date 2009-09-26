@@ -18,12 +18,8 @@ Readonly my $STATE_PREPARING => 0;
 Readonly my $STATE_RUNNING   => 1;
 Readonly my $STATE_PAUSED    => 2;
 
-sub new {
-    my ($class, %params) = (@_);
-
-    my $self = $class->SUPER::new(%params);
-
-    $self->evt_manager->reg_listener($self);
+sub init {
+    my $self = shift;
 
     $self->{level} = 0.5;
     $self->{state} = $STATE_PREPARING;
@@ -34,8 +30,6 @@ sub new {
     $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'GridBuilt', grid => $self->grid));
 
     #$self->{player} =; For points, level so on
-
-    return $self;
 }
 
 sub start {

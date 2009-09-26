@@ -8,16 +8,6 @@ use base 'SDL::Tutorial::Tetris::Controller';
 use SDL;
 use SDL::Event;
 
-sub new {
-    my ($class, %params) = (@_);
-
-    my $self  = $class->SUPER::new(%params);
-
-    $self->evt_manager->reg_listener($self);
-
-    return $self;
-}
-
 sub notify {
     my ($self, $event) = (@_);
 

@@ -19,11 +19,13 @@ my $manager  = SDL::Tutorial::Tetris::EventManager->new;
 my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new($manager);
 my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new($manager);
 my $gameView = SDL::Tutorial::Tetris::View::Game->new($manager);
-my $game     = SDL::Tutorial::Tetris::Controller::Game->new($manager);
 
-$game->EDEBUG($EDEBUG);
-$game->GDEBUG($GDEBUG);
-$game->KEYDEBUG($KEYDEBUG);
-$game->FPS($FPS);
+my $game     = SDL::Tutorial::Tetris::Controller::Game->new(
+    evt_manager => $manager,
+    EDEBUG      => $EDEBUG,
+    GDEBUG      => $GDEBUG,
+    KEYDEBUG    => $KEYDEBUG,
+    FPS         => $FPS,
+);
 
 $spinner->run;

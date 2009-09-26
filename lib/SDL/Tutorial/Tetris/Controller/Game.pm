@@ -18,20 +18,26 @@ Readonly my $STATE_RUNNING   => 1;
 Readonly my $STATE_PAUSED    => 2;
 
 sub new {
-    my ($class, $event) = (@_);
-    my $self  = $class->SUPER::new();
+    my ($class, %params) = (@_);
 
     die 'Expects an SDL::Tutorial::Tetris::EventManager'
-      unless defined $event and $event->isa('SDL::Tutorial::Tetris::EventManager');
-    $self->{level} = 0.5;
-    $self->evt_manager($event);
+        unless defined $params{evt_manager}
+                   and $params{evt_manager}->isa('SDL::Tutorial::Tetris::EventManager');
+
+    my $self = $class->SUPER::new(%params);
+
     $self->evt_manager->reg_listener($self);
+
+    $self->{level} = 0.5;
     $self->{state} = $STATE_PREPARING;
+
     print "Game PREPARING ... \n" if $self->GDEBUG;
+
     $self->init_grid;
     $self->evt_manager->post(SDL::Tutorial::Tetris::Event::GridBuilt->new($self->grid));
 
     #$self->{player} =; For points, level so on
+
     return $self;
 }
 

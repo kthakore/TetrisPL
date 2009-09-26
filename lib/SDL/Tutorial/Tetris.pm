@@ -30,9 +30,9 @@ BEGIN {
 }
 
 sub new {
-    my ($class, %parameters) = @_;
+    my ($class, %params) = @_;
 
-    my $self = bless ({}, ref ($class) || $class);
+    my $self = bless ({%params}, ref ($class) || $class);
 
     return $self;
 }

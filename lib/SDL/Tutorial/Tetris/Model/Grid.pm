@@ -171,7 +171,7 @@ sub notify {
 
     print "Notify in Grid \n" if $self->EDEBUG;
 
-    if (defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Tick')) {
+    if (defined $event && $event->name eq 'Tick') {
 
         #do checks
 

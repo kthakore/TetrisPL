@@ -20,7 +20,7 @@ sub new {
 sub run {
     my $self = shift;
     while ($self->{keep_going} == 1) {
-        my $tick = SDL::Tutorial::Tetris::Event::Tick->new;
+        my $tick = SDL::Tutorial::Tetris::Event->new( name => 'Tick' );
         $self->evt_manager->post($tick);
     }
 }
@@ -30,7 +30,7 @@ sub notify {
 
     print "Notify in CPU Spinner \n" if $self->EDEBUG;
 
-    if (defined $event && $event->isa('SDL::Tutorial::Tetris::Event::Quit')) {
+    if (defined $event && $event->name eq 'Quit') {
         print "Stopping to pump ticks \n" if $self->EDEBUG;
 
         #if we got a quit event that means we can stop running the game

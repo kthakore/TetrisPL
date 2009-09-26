@@ -9,34 +9,6 @@ use Class::XSAccessor accessors => {
     name => 'name',
 };
 
-package SDL::Tutorial::Tetris::Event::Tick;
-
-use strict;
-use warnings;
-
-use base 'SDL::Tutorial::Tetris::Event';
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new();
-    $self->name('CPU Tick Event');
-    return $self;
-}
-
-package SDL::Tutorial::Tetris::Event::Quit;
-
-use strict;
-use warnings;
-
-use base 'SDL::Tutorial::Tetris::Event';
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->name('Program Close Event');
-    return $self;
-}
-
 package SDL::Tutorial::Tetris::Event::GridBuilt;
 
 use strict;
@@ -49,7 +21,7 @@ use Class::XSAccessor accessors => {grid => 'grid'};
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    $self->name('Grid Built Event');
+    $self->name('GridBuilt');
     $self->grid($_[0]);
     return $self;
 }
@@ -65,22 +37,8 @@ use Class::XSAccessor accessors => {game => 'game',};
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
-    $self->name('Game Start Event');
+    $self->name('GameStart');
     $self->game($_[0]);
-    return $self;
-}
-
-package SDL::Tutorial::Tetris::Event::CharactorMove;
-
-use strict;
-use warnings;
-
-use base 'SDL::Tutorial::Tetris::Event';
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new;
-    $self->name('Charactor is Moving');
     return $self;
 }
 
@@ -96,9 +54,8 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
     $self->direction($_[0]);
-    $self->name('Charactor Move Request');
+    $self->name('CharactorMoveRequest');
     return $self;
 }
-
 
 1;

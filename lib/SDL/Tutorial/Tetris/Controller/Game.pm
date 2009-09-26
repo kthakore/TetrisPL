@@ -50,7 +50,7 @@ sub start {
 
 sub init_grid {
     my $self = shift;
-    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new($self->evt_manager));
+    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
     $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
     $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
     $self->{posx} =
@@ -86,10 +86,7 @@ sub notify {
 
     print "Notify in GAME \n" if $self->EDEBUG;
 
-    if (   defined $event
-        && $event->isa('SDL::Tutorial::Tetris::Event')
-        && !$event->isa('SDL::Tutorial::Tetris::Event::GridBuilt'))
-    {
+    if ( defined $event and $event->name ne 'SDL::Tutorial::Tetris::Event::GridBuilt' ) {
         if ($self->{state} == $STATE_PREPARING) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $self->GDEBUG;
@@ -98,7 +95,7 @@ sub notify {
         if ($self->{state} == $STATE_RUNNING) {
 
             #lets grab those move requests events
-            if ($event->isa('SDL::Tutorial::Tetris::Request::CharactorMove')) {
+            if ($event->name eq 'CharactorMoveRequest') {
                 print "Move charactor sprite \n" if $self->GDEBUG;
                 my ($mx, $my, $rot) =
                   ($self->{posx}, $self->{posy}, $self->{pieceRotation});
@@ -122,11 +119,11 @@ sub notify {
                     ($self->{posx}, $self->{posy}, $self->{pieceRotation}) =
                       ($mx, $my, $rot);
 
-                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::CharactorMove->new());
+                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'CharactorMove' ));
                 }
             }
-            if ($event->isa('SDL::Tutorial::Tetris::Event::Tick')
-                && ((time - $self->{wait}) > $self->{level}))
+            if ($event->name eq 'Tick'
+                and ((time - $self->{wait}) > $self->{level}))
             {
                 $self->{wait} = time;
 
@@ -137,7 +134,7 @@ sub notify {
                   )
                 {
                     $self->{posy}++;
-                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::CharactorMove->new());
+                    $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'CharactorMove' ));
                 }
                 else {
 
@@ -152,7 +149,7 @@ sub notify {
                     if ($self->grid->is_game_over()) {
 
                         #make this SDL::Tutorial::Tetris::Event::GameOver
-                        $self->evt_manager->post(SDL::Tutorial::Tetris::Event::Quit->new());
+                        $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'Quit' ));
                     }
                 }
             }

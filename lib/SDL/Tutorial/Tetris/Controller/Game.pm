@@ -99,17 +99,17 @@ sub notify {
                 print "Move charactor sprite \n" if $self->GDEBUG;
                 my ($mx, $my, $rot) =
                   ($self->{posx}, $self->{posy}, $self->{pieceRotation});
-                if ($event->direction == $self->ROTATE_C) {
+                if ($event->{direction} == $self->ROTATE_C) {
                     $rot++;
                     $rot = $rot % 4;
                 }
-                if ($event->direction == $self->ROTATE_CC) {
+                if ($event->{direction} == $self->ROTATE_CC) {
                     $rot--;
                     $rot = $rot % 4;
                 }
-                $my++ if ($event->direction == $self->DIRECTION_DOWN);
-                $mx-- if ($event->direction == $self->DIRECTION_LEFT);
-                $mx++ if ($event->direction == $self->DIRECTION_RIGHT);
+                $my++ if ($event->{direction} == $self->DIRECTION_DOWN);
+                $mx-- if ($event->{direction} == $self->DIRECTION_LEFT);
+                $mx++ if ($event->{direction} == $self->DIRECTION_RIGHT);
 
                 if ($self->grid->is_possible_movement(
                         $mx, $my, $self->{piece}, $rot

@@ -3,6 +3,8 @@ package SDL::Tutorial::Tetris;
 use strict;
 use warnings;
 
+use SDL::Tutorial::Tetris::EventManager;
+
 # all the classes inherit these basic accessors:
 use Class::XSAccessor accessors => {
     EDEBUG   => 'EDEBUG',
@@ -18,16 +20,8 @@ sub DIRECTION_DOWN  { 2 }    # Drops the block
 sub DIRECTION_LEFT  { 3 }    # move left
 sub DIRECTION_RIGHT { 4 }    # move right
 
-BEGIN {
-    use Exporter ();
-    use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = '0.01';
-    @ISA         = qw(Exporter);
-    #Give a hoot don't pollute, do not export more than needed by default
-    @EXPORT      = qw();
-    @EXPORT_OK   = qw();
-    %EXPORT_TAGS = ();
-}
+# all the classes will also inherit the evt_manager,
+# so we won't have to pass it around everywhere
 
 sub new {
     my ($class, %params) = @_;
@@ -36,6 +30,9 @@ sub new {
 
     return $self;
 }
+
+my $evt_manager = SDL::Tutorial::Tetris::EventManager->new();
+sub evt_manager { $evt_manager }
 
 1;
 

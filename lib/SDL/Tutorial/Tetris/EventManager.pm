@@ -1,13 +1,14 @@
 package SDL::Tutorial::Tetris::EventManager;
 
-use base 'SDL::Tutorial::Tetris';
+#use base 'SDL::Tutorial::Tetris';
 
 sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new();
+    my ($class, %params) = @_;
 
-    $self->{listeners} = {};
-    $self->{evt_queue} = [];
+    my $self = bless {%params}, $class;
+
+    $self->{listeners} ||= {};
+    $self->{evt_queue} ||= [];
 
     return $self;
 }
@@ -42,7 +43,9 @@ sub un_reg_listener {
 sub post {
     my $self = shift;
     my $event = shift if (@_) or die "Post needs a TickEvent";
-    print 'Event' . $event->name . "notified\n" if $self->EDEBUG;
+
+    #print 'Event' . $event->name . "notified\n" if $self->EDEBUG;
+
     die "Post needs a Event as parameter"
       unless $event->isa('SDL::Tutorial::Tetris::Event');
 

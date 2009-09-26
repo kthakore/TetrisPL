@@ -5,6 +5,7 @@ use base 'SDL::Tutorial::Tetris::Controller';
 use Class::XSAccessor accessors => { 
     grid => 'grid'
 };
+
 use Data::Dumper;
 use Time::HiRes qw/time/;
 use Readonly;
@@ -19,10 +20,6 @@ Readonly my $STATE_PAUSED    => 2;
 
 sub new {
     my ($class, %params) = (@_);
-
-    die 'Expects an SDL::Tutorial::Tetris::EventManager'
-        unless defined $params{evt_manager}
-                   and $params{evt_manager}->isa('SDL::Tutorial::Tetris::EventManager');
 
     my $self = $class->SUPER::new(%params);
 

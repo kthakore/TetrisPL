@@ -15,13 +15,11 @@ use Data::Dumper;
 
 our ($EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @ARGV;
 
-my $manager  = SDL::Tutorial::Tetris::EventManager->new;
-my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new($manager);
-my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new($manager);
-my $gameView = SDL::Tutorial::Tetris::View::Game->new($manager);
+my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new();
+my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new();
+my $gameView = SDL::Tutorial::Tetris::View::Game->new();
 
 my $game     = SDL::Tutorial::Tetris::Controller::Game->new(
-    evt_manager => $manager,
     EDEBUG      => $EDEBUG,
     GDEBUG      => $GDEBUG,
     KEYDEBUG    => $KEYDEBUG,

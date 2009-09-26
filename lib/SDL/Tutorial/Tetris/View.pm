@@ -6,7 +6,6 @@ use warnings;
 use base 'SDL::Tutorial::Tetris';
 
 use Class::XSAccessor accessors => {
-    evt_manager => 'evt_manager', 
     app => 'app'
 };
 
@@ -28,15 +27,13 @@ our @palette = (
 );
 
 sub new {
-    my ($class, $event) = (@_);
-    my $self  = $class->SUPER::new();
+    my ($class, %params) = (@_);
 
-    die 'Expects an SDL::Tutorial::Tetris::EventManager'
-      unless defined $event and $event->isa('SDL::Tutorial::Tetris::EventManager');
+    my $self  = $class->SUPER::new(%params);
 
-    $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
     $self->init;
+
     return $self;
 }
 

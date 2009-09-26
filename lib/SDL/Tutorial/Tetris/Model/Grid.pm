@@ -8,7 +8,6 @@ use base 'SDL::Tutorial::Tetris';
 use Data::Dumper;
 
 use Class::XSAccessor accessors => {
-    evt_manager => 'evt_manager',
     blocks      => 'blocks',
     grid        => 'grid'
 };
@@ -16,15 +15,13 @@ use Class::XSAccessor accessors => {
 use SDL::Tutorial::Tetris::Model::Blocks;
 
 sub new {
-    my ($class, $event) = (@_);
-    my $self  = $class->SUPER::new();
+    my ($class, %params) = (@_);
 
-    die 'Expects an SDL::Tutorial::Tetris::EventManager'
-      unless defined $event and $event->isa('SDL::Tutorial::Tetris::EventManager');
+    my $self  = $class->SUPER::new(%params);
 
-    $self->evt_manager($event);
     $self->evt_manager->reg_listener($self);
-    $self->init(@_);
+    $self->init(%params);
+
     return $self;
 }
 

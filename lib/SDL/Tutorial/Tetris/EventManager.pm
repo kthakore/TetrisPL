@@ -42,12 +42,12 @@ sub un_reg_listener {
 
 sub post {
     my $self = shift;
-    my $event = shift if (@_) or die "Post needs a TickEvent";
+    my $event = shift;
 
     #print 'Event' . $event->name . "notified\n" if $self->EDEBUG;
 
     die "Post needs a Event as parameter"
-      unless $event->isa('SDL::Tutorial::Tetris::Event');
+      unless defined $event and $event->isa('SDL::Tutorial::Tetris::Event');
 
 #print 'Event' . $event->name ." called \n" if (!$event->isa('SDL::Tutorial::Tetris::Event::Tick') && $self->EFDEBUG);
 

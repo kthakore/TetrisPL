@@ -26,53 +26,10 @@ sub init {
 
     print "Game PREPARING ... \n" if $self->GDEBUG;
 
-    $self->init_grid;
+    $self->_init_grid;
     $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'GridBuilt', grid => $self->grid));
 
     #$self->{player} =; For points, level so on
-}
-
-sub start {
-    my $self = shift;
-
-    $self->{state} = $STATE_RUNNING;
-    print "Game RUNNING \n" if $self->GDEBUG;
-    my $event = SDL::Tutorial::Tetris::Event->new( name => 'GameStart', game => $self );
-    $self->evt_manager->post($event);
-    $self->{wait} = time;
-}
-
-sub init_grid {
-    my $self = shift;
-    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
-    $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
-    $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
-    $self->{posx} =
-      $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
-    $self->{posy} =
-      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
-
-    #     //  Next piece
-    $self->{next_piece}    = int(rand(7));
-    $self->{next_rotation} = int(rand(4));
-    $self->{next_posx}     = ($self->grid->{width}) + 1;
-    $self->{next_posy}     = 0;
-}
-
-sub create_new_piece {
-    my $self = shift;
-    $self->{piece}         = $self->{next_piece};
-    $self->{pieceRotation} = $self->{next_rotation};
-    $self->{posx} =
-      $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
-    $self->{posy} =
-      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
-
-    #     //  Next piece
-    $self->{next_piece}    = int(rand(7));
-    $self->{next_rotation} = int(rand(4));
 }
 
 sub notify {
@@ -84,7 +41,7 @@ sub notify {
         if ($self->{state} == $STATE_PREPARING) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $self->GDEBUG;
-            $self->start;
+            $self->_start;
         }
         if ($self->{state} == $STATE_RUNNING) {
 
@@ -136,7 +93,7 @@ sub notify {
                         $self->{posx},  $self->{posy},
                         $self->{piece}, $self->{pieceRotation}
                     );
-                    $self->create_new_piece();
+                    $self->_create_new_piece();
 
                     $self->{level}
                       -= (0.01) * $self->grid->delete_possible_lines;
@@ -156,4 +113,63 @@ sub notify {
     #now
 }
 
+sub _start {
+    my $self = shift;
+
+    $self->{state} = $STATE_RUNNING;
+    print "Game RUNNING \n" if $self->GDEBUG;
+    my $event = SDL::Tutorial::Tetris::Event->new( name => 'GameStart', game => $self );
+    $self->evt_manager->post($event);
+    $self->{wait} = time;
+}
+
+sub _init_grid {
+    my $self = shift;
+    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
+    $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
+    $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
+    $self->{posx} =
+      $self->grid->{width} / 2
+      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+    $self->{posy} =
+      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+
+    #     //  Next piece
+    $self->{next_piece}    = int(rand(7));
+    $self->{next_rotation} = int(rand(4));
+    $self->{next_posx}     = ($self->grid->{width}) + 1;
+    $self->{next_posy}     = 0;
+}
+
+sub _create_new_piece {
+    my $self = shift;
+    $self->{piece}         = $self->{next_piece};
+    $self->{pieceRotation} = $self->{next_rotation};
+    $self->{posx} =
+      $self->grid->{width} / 2
+      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
+    $self->{posy} =
+      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+
+    #     //  Next piece
+    $self->{next_piece}    = int(rand(7));
+    $self->{next_rotation} = int(rand(4));
+}
+
 1;
+
+__END__
+
+=head1 NAME
+
+SDL::Tutorial::Tetris::Controller::Game
+
+=head1 DESCRIPTION
+
+The C<Game> controller
+
+=head2 init
+
+Initialize game variables, like level and state.
+
+=head2 notify

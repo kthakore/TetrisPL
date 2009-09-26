@@ -24,3 +24,20 @@ sub new {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+SDL::Tutorial::Tetris::Controller - base class for controllers
+
+=head1 DESCRIPTION
+
+This is the base class for controllers, so you don't have to
+repeat yourself.
+
+=head2 new
+
+It implements a constructor which will 1) register a listener
+for your new controller, so it can receive events; and 2) call
+the init method.

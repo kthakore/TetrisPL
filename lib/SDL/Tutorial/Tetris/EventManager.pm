@@ -57,3 +57,30 @@ sub post {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+SDL::Tutorial::Tetris::EventManager
+
+=head1 DESCRIPTION
+
+The C<EventManager> is responsible for sending events to
+controllers, so they can trigger actions at specific times.
+
+For instance, when you press a key, or the game ticks, it
+is an event.
+
+The C<EventManager> will contact all the controllers so they
+can take the appropriate action.
+
+=head2 reg_listener
+
+=head2 un_reg_listener
+
+=head2 listeners
+
+=head2 evt_queue
+
+=head2 post

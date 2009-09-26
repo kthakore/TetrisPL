@@ -5,17 +5,17 @@ use warnings;
 
 use base 'SDL::Tutorial::Tetris::Controller';
 
+sub init {
+    my $self = shift;
+    $self->{keep_going} ||= 1;
+}
+
 sub run {
     my $self = shift;
     while ($self->{keep_going} == 1) {
         my $tick = SDL::Tutorial::Tetris::Event->new( name => 'Tick' );
         $self->evt_manager->post($tick);
     }
-}
-
-sub init {
-    my $self = shift;
-    $self->{keep_going} ||= 1;
 }
 
 sub notify {
@@ -36,3 +36,33 @@ sub notify {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+SDL::Tutorial::Tetris::Controller::CPUSpinner
+
+=head1 DESCRIPTION
+
+The C<CPUSpinner> controller is the heartbeat of the game.
+
+The game proceeds while C<keep_going> is set. When C<CPUSpinner>
+receives a C<Quit> event, C<keep_going> is set to zero.
+
+=head2 init
+
+C<init> simply initializes C<keep_going>, so the game will start.
+
+=head2 run
+
+Produces a C<Tick> event while C<keep_going> is set.
+
+=head2 notify
+
+If this controller receives a C<Quit> event, C<keep_going> is
+set to zero, stopping the game.
+
+=head1 SEE ALSO
+
+L<SDL::Tutorial::Tetris::Controller>

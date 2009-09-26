@@ -22,6 +22,8 @@ sub DIRECTION_RIGHT { 4 }    # move right
 
 # all the classes will also inherit the evt_manager,
 # so we won't have to pass it around everywhere
+my $evt_manager = SDL::Tutorial::Tetris::EventManager->new();
+sub evt_manager { $evt_manager }
 
 sub new {
     my ($class, %params) = @_;
@@ -31,43 +33,28 @@ sub new {
     return $self;
 }
 
-my $evt_manager = SDL::Tutorial::Tetris::EventManager->new();
-sub evt_manager { $evt_manager }
-
 1;
 
 __END__
 
 =head1 NAME
 
-SDL::Tutorial::Tetris - Tutorial using SDL and MVC design to make Tetris
-
-=head1 SYNOPSIS
-
-  use SDL::Tutorial::Tetris;
-  blah blah blah
-
+SDL::Tutorial::Tetris - base class
 
 =head1 DESCRIPTION
 
-Stub documentation for this module was created by ExtUtils::ModuleMaker.
-It looks like the author of the extension was negligent enough
-to leave the stub unedited.
+This is the base class for most of the game objects. We put in this class
+all the information that we want to be visible across the game:
 
-Blah blah blah.
+=head2 Constants
 
+=head2 Debug properties
 
-=head1 USAGE
+=head2 Event Manager
 
+=head1 SEE ALSO
 
-
-=head1 BUGS
-
-
-
-=head1 SUPPORT
-
-
+L<SDL::Tutorial::Tetris::EventManager>
 
 =head1 AUTHOR
 

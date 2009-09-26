@@ -67,7 +67,7 @@ sub notify {
         #lets send the new events to be process back the event manager
         $self->evt_manager->post($event_to_process)
           if defined $event_to_process;
-
+	$event_to_process = undef; #why the hell do I have to do this shouldn't it be destroied now? 
     }
 
     #if we did not have a tick event then some other controller needs to do

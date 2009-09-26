@@ -32,7 +32,7 @@ sub un_reg_listener {
     my ($self, $listener) = (@_);
 
     if (defined $listener) {
-        return delete $self->listeners->{\$listener};
+        return delete $self->listeners->{$listener};
     }
     else {
         return;

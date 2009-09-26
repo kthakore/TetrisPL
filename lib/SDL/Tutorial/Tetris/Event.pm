@@ -9,23 +9,6 @@ use Class::XSAccessor accessors => {
     name => 'name',
 };
 
-package SDL::Tutorial::Tetris::Event::GridBuilt;
-
-use strict;
-use warnings;
-
-use base 'SDL::Tutorial::Tetris::Event';
-use Data::Dumper;
-use Class::XSAccessor accessors => {grid => 'grid'};
-
-sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new();
-    $self->name('GridBuilt');
-    $self->grid($_[0]);
-    return $self;
-}
-
 package SDL::Tutorial::Tetris::Event::CharactorMoveRequest;
 
 use base 'SDL::Tutorial::Tetris::Event';

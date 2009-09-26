@@ -31,7 +31,7 @@ sub new {
     print "Game PREPARING ... \n" if $self->GDEBUG;
 
     $self->init_grid;
-    $self->evt_manager->post(SDL::Tutorial::Tetris::Event::GridBuilt->new($self->grid));
+    $self->evt_manager->post(SDL::Tutorial::Tetris::Event->new( name => 'GridBuilt', grid => $self->grid));
 
     #$self->{player} =; For points, level so on
 
@@ -86,7 +86,7 @@ sub notify {
 
     print "Notify in GAME \n" if $self->EDEBUG;
 
-    if ( defined $event and $event->name ne 'SDL::Tutorial::Tetris::Event::GridBuilt' ) {
+    if ( defined $event and $event->name ne 'GridBuilt' ) { # XXX
         if ($self->{state} == $STATE_PREPARING) {
             print "Event " . $event->name . "caught to start Game  \n"
               if $self->GDEBUG;

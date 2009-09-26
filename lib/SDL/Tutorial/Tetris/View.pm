@@ -201,7 +201,7 @@ sub notify {
         }
         if ($event->name eq 'GridBuilt') {
             print "Showing Grid \n" if $self->GDEBUG;
-            $self->{grid} = $event->grid;
+            $self->{grid} = $event->{grid};
         }
         if ($event->name eq 'GameStart') {
             print "Starting Game \n" if $self->GDEBUG;

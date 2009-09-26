@@ -42,7 +42,7 @@ sub new {
     return $self;
 }
 
-package SDL::Tutorial::Tetris::Request::CharactorMove;
+package SDL::Tutorial::Tetris::Event::CharactorMoveRequest;
 
 use base 'SDL::Tutorial::Tetris::Event';
 

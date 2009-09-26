@@ -48,15 +48,15 @@ sub notify {
             #later on we will add more stuff
             $event_to_process = SDL::Tutorial::Tetris::Event->new( name => 'Quit' )
               if $key =~ 'escape';
-            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($self->ROTATE_C)
+            $event_to_process = SDL::Tutorial::Tetris::Event::CharactorMoveRequest->new($self->ROTATE_C)
               if $key =~ 'up';
-            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($self->ROTATE_CC)
+            $event_to_process = SDL::Tutorial::Tetris::Event::CharactorMoveRequest->new($self->ROTATE_CC)
               if $key =~ 'space';
-            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($self->DIRECTION_DOWN)
+            $event_to_process = SDL::Tutorial::Tetris::Event::CharactorMoveRequest->new($self->DIRECTION_DOWN)
               if $key =~ 'down';
-            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($self->DIRECTION_LEFT)
+            $event_to_process = SDL::Tutorial::Tetris::Event::CharactorMoveRequest->new($self->DIRECTION_LEFT)
               if $key =~ 'left';
-            $event_to_process = SDL::Tutorial::Tetris::Request::CharactorMove->new($self->DIRECTION_RIGHT)
+            $event_to_process = SDL::Tutorial::Tetris::Event::CharactorMoveRequest->new($self->DIRECTION_RIGHT)
               if $key =~ 'right';
         }
         if ($event_type == SDL_KEYUP) {

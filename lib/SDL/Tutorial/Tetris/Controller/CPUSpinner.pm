@@ -22,20 +22,27 @@ sub notify {
 
     print "Notify in CPU Spinner \n" if $self->EDEBUG;
 
-    my %event_action = (
-        'Quit' => sub { $self->{keep_going} = 0 },
+    my %event_method = (
+        'Quit' =>  '_quit',
     );
 
-    if ( defined $event_action{ $event->{name} } ) {
+    my $method = $event_action{ $event->{name} };
+
+    if ( defined $method ) {
         print "Event: $event->{name}\n" if $self->EDEBUG;
 
-        # call the corresponding action
-        $event_action{ $event->{name} }->();
+        # call the corresponding method
+        $self->$method();
     }
 
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input
     #now
+}
+
+sub _quit {
+    my $self = shift;
+    $self->{keep_going} = 0;
 }
 
 1;

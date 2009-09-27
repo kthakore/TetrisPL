@@ -30,8 +30,8 @@ sub notify {
 
     my $event_type = $self->event->type;
 
-    my $key = ( $event_type == SDL_KEYDOWN ) ? $self->event->key_name
-                                             : '';
+    my $key = ( $event_type == SDL_KEYDOWN )       ? $self->event->key_name
+                                                   : '';
 
     $self->{key} = $key;
 

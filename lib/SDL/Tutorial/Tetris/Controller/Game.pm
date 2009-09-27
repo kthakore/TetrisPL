@@ -46,61 +46,10 @@ sub notify {
 
             #lets grab those move requests events
             if ($event->{name} eq 'CharactorMoveRequest') {
-                print "Move charactor sprite \n" if $self->GDEBUG;
-                my ($mx, $my, $rot) =
-                  ($self->{posx}, $self->{posy}, $self->{pieceRotation});
-                if ($event->{direction} == $self->ROTATE_C) {
-                    $rot++;
-                    $rot = $rot % 4;
-                }
-                if ($event->{direction} == $self->ROTATE_CC) {
-                    $rot--;
-                    $rot = $rot % 4;
-                }
-                $my++ if ($event->{direction} == $self->DIRECTION_DOWN);
-                $mx-- if ($event->{direction} == $self->DIRECTION_LEFT);
-                $mx++ if ($event->{direction} == $self->DIRECTION_RIGHT);
-
-                if ($self->grid->is_possible_movement(
-                        $mx, $my, $self->{piece}, $rot
-                    )
-                  )
-                {
-                    ($self->{posx}, $self->{posy}, $self->{pieceRotation}) =
-                      ($mx, $my, $rot);
-
-                    $self->evt_manager->post({ name => 'CharactorMove' });
-                }
+                $self->_charactor_move_request($event);
             }
-            if ($event->{name} eq 'Tick'
-                and ((time - $self->{wait}) > $self->{level}))
-            {
-                $self->{wait} = time;
-
-                if ($self->grid->is_possible_movement(
-                        $self->{posx},  $self->{posy} + 1,
-                        $self->{piece}, $self->{pieceRotation}
-                    )
-                  )
-                {
-                    $self->{posy}++;
-                    $self->evt_manager->post({ name => 'CharactorMove' });
-                }
-                else {
-
-                    $self->grid->store_piece(
-                        $self->{posx},  $self->{posy},
-                        $self->{piece}, $self->{pieceRotation}
-                    );
-                    $self->_create_new_piece();
-
-                    $self->{level}
-                      -= (0.01) * $self->grid->delete_possible_lines;
-                    if ($self->grid->is_game_over()) {
-                        #make GameOver
-                        $self->evt_manager->post({ name => 'Quit' });
-                    }
-                }
+            if ($event->{name} eq 'Tick' and ((time - $self->{wait}) > $self->{level})) {
+                $self->_tick($event);
             }
 
         }
@@ -109,6 +58,53 @@ sub notify {
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input
     #now
+}
+
+sub _charactor_move_request {
+    my ($self, $event) = @_;
+
+    print "Move charactor sprite \n" if $self->GDEBUG;
+    my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
+    if ($event->{direction} == $self->ROTATE_C) {
+        $rot++;
+        $rot = $rot % 4;
+    }
+    if ($event->{direction} == $self->ROTATE_CC) {
+        $rot--;
+        $rot = $rot % 4;
+    }
+    $my++ if ($event->{direction} == $self->DIRECTION_DOWN);
+    $mx-- if ($event->{direction} == $self->DIRECTION_LEFT);
+    $mx++ if ($event->{direction} == $self->DIRECTION_RIGHT);
+
+    if ($self->grid->is_possible_movement($mx, $my, $self->{piece}, $rot)) {
+        ($self->{posx}, $self->{posy}, $self->{pieceRotation}) = ($mx, $my, $rot);
+
+        $self->evt_manager->post({name => 'CharactorMove'});
+    }
+}
+
+sub _tick {
+    my ($self, $event) = @_;
+
+    $self->{wait} = time;
+
+    if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation})) {
+        $self->{posy}++;
+        $self->evt_manager->post({name => 'CharactorMove'});
+    }
+    else {
+
+        $self->grid->store_piece($self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
+        $self->_create_new_piece();
+
+        $self->{level} -= (0.01) * $self->grid->delete_possible_lines;
+        if ($self->grid->is_game_over()) {
+
+            #make GameOver
+            $self->evt_manager->post({name => 'Quit'});
+        }
+    }
 }
 
 sub _start {

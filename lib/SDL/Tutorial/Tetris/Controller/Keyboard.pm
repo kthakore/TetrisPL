@@ -33,17 +33,20 @@ sub notify {
     my $key        = $self->{last_key} || $sdl_event->key_name;
 
     if ( $key =~ /(down|left|right)/ ) {
+        # store last pressed key, so the blocks 
+        # will continue sliding next time
         $self->{last_key} = $key;
     }
 
-    if ( $event_type == SDL_QUIT ) {
-        $key = 'escape';
-    }
-    elsif ($event_type == SDL_KEYUP) {
+    if ($event_type == SDL_KEYUP) {
+        # stop sliding on key up
         delete $self->{last_key};
         $key = '';
     }
-   
+    elsif ( $event_type == SDL_QUIT ) {
+        $key = 'escape';
+    }
+
     my %event_key = (
         'escape' => { name => 'Quit' },
         'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },

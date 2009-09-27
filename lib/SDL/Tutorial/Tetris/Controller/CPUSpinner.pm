@@ -26,7 +26,7 @@ sub notify {
         'Quit' =>  '_quit',
     );
 
-    my $method = $event_action{ $event->{name} };
+    my $method = $event_method{ $event->{name} };
 
     if ( defined $method ) {
         print "Event: $event->{name}\n" if $self->EDEBUG;

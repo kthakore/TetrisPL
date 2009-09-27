@@ -24,13 +24,14 @@ sub notify {
 
     my $event_to_process = undef;
 
-    $self->event(SDL::Event->new);
-    $self->event->pump;    #get events from SDL queue
-    $self->event->poll;    #get the first one
+    my $sdl_event = SDL::Event->new();
 
-    my $event_type = $self->event->type;
+    $sdl_event->pump;    #get events from SDL queue
+    $sdl_event->poll;    #get the first one
 
-    my $key = ( $event_type == SDL_KEYDOWN )       ? $self->event->key_name
+    my $event_type = $sdl_event->type;
+
+    my $key = ( $event_type == SDL_KEYDOWN )       ? $sdl_event->key_name
                                                    : '';
 
     $self->{key} = $key;

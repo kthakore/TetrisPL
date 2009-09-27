@@ -16,7 +16,7 @@ sub notify {
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input
     #now
-    return if !defined $event or $event->name ne 'Tick';
+    return if !defined $event or $event->{name} ne 'Tick';
 
     #if we got a tick event that means we are starting
     #a new iteration of game loop
@@ -41,22 +41,17 @@ sub notify {
 
         #This process the only keys we care about right now
         #later on we will add more stuff
-        $event_to_process = SDL::Tutorial::Tetris::Event->new(name => 'Quit')
+        $event_to_process = { name => 'Quit' }
           if $key =~ 'escape';
-        $event_to_process =
-          SDL::Tutorial::Tetris::Event->new(name => 'CharactorMoveRequest', direction => $self->ROTATE_C)
+        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->ROTATE_C }
           if $key =~ 'up';
-        $event_to_process =
-          SDL::Tutorial::Tetris::Event->new(name => 'CharactorMoveRequest', direction => $self->ROTATE_CC)
+        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC }
           if $key =~ 'space';
-        $event_to_process =
-          SDL::Tutorial::Tetris::Event->new(name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN)
+        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN }
           if $key =~ 'down';
-        $event_to_process =
-          SDL::Tutorial::Tetris::Event->new(name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT)
+        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT }
           if $key =~ 'left';
-        $event_to_process =
-          SDL::Tutorial::Tetris::Event->new(name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT)
+        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT }
           if $key =~ 'right';
     }
     if ($event_type == SDL_KEYUP) {

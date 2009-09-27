@@ -171,10 +171,8 @@ sub notify {
 
     print "Notify in Grid \n" if $self->EDEBUG;
 
-    if (defined $event && $event->name eq 'Tick') {
-
+    if (defined $event && $event->{name} eq 'Tick') {
         #do checks
-
     }
 }
 

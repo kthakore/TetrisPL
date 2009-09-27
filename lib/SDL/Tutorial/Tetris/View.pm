@@ -193,17 +193,17 @@ sub notify {
     print "Notify in View Game \n" if $self->EDEBUG;
 
     if (defined $event) {
-        if ($event->name eq 'Tick') {
+        if ($event->{name} eq 'Tick') {
             print "Update Game View \n" if $self->GDEBUG;
             frame_rate(1) if $self->FPS;
 
             #if we got a quit event that means we can stop running the game
         }
-        if ($event->name eq 'GridBuilt') {
+        if ($event->{name} eq 'GridBuilt') {
             print "Showing Grid \n" if $self->GDEBUG;
             $self->{grid} = $event->{grid};
         }
-        if ($event->name eq 'GameStart') {
+        if ($event->{name} eq 'GameStart') {
             print "Starting Game \n" if $self->GDEBUG;
 
             $self->{game} = $event->{game};
@@ -213,7 +213,7 @@ sub notify {
             $self->app->sync();
         }
 
-        if ($event->name eq 'CharactorMove') {
+        if ($event->{name} eq 'CharactorMove') {
             print "Moving charactor sprite in view\n" if $self->GDEBUG;
             $self->clear();
             $self->draw_scene() if ($self->{grid} && $self->{grid});

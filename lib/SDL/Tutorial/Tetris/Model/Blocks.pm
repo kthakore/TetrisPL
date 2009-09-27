@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Model::Blocks;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris';
+use base 'SDL::Tutorial::Tetris::Base';
 
 use Data::Dumper;
 require Exporter;

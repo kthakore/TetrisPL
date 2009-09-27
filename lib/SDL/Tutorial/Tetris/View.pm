@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::View::Game;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris';
+use base 'SDL::Tutorial::Tetris::Base';
 
 use Class::XSAccessor accessors => {
     app => 'app'

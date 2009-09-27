@@ -1,4 +1,4 @@
-package SDL::Tutorial::Tetris;
+package SDL::Tutorial::Tetris::Base;
 
 use strict;
 use warnings;
@@ -41,7 +41,7 @@ __END__
 
 =head1 NAME
 
-SDL::Tutorial::Tetris - base class
+SDL::Tutorial::Tetris::Base - base class
 
 =head1 DESCRIPTION
 

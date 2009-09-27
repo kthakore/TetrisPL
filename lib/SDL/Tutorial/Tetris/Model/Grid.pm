@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Model::Grid;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris';
+use base 'SDL::Tutorial::Tetris::Base';
 
 use Data::Dumper;
 

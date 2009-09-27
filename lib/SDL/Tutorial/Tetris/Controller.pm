@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Controller;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris';
+use base 'SDL::Tutorial::Tetris::Base';
 
 sub new {
     my ($class, %params) = (@_);

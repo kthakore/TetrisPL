@@ -43,7 +43,7 @@ sub notify {
 
     my $state = $self->{state};
 
-    my %event_state = (
+    my %event_method = (
         $STATE_PREPARING => {
             '*' => '_start',
         },
@@ -53,7 +53,7 @@ sub notify {
         },
     );
 
-    my $method = $event_state{$state}{$event->{name}} || $event_state{$state}{'*'};
+    my $method = $event_method{$state}{$event->{name}} || $event_method{$state}{'*'};
 
     if ( defined $method ) {
         # call the event

@@ -192,38 +192,36 @@ sub notify {
 
     print "Notify in View Game \n" if $self->EDEBUG;
 
-    if (defined $event) {
-        if ($event->{name} eq 'Tick') {
-            print "Update Game View \n" if $self->GDEBUG;
-            frame_rate(1) if $self->FPS;
-
-            #if we got a quit event that means we can stop running the game
-        }
-        if ($event->{name} eq 'GridBuilt') {
-            print "Showing Grid \n" if $self->GDEBUG;
-            $self->{grid} = $event->{grid};
-        }
-        if ($event->{name} eq 'GameStart') {
-            print "Starting Game \n" if $self->GDEBUG;
-
-            $self->{game} = $event->{game};
-            $self->draw_scene() if $self->{grid};
-
-            #die;
-            $self->app->sync();
-        }
-
-        if ($event->{name} eq 'CharactorMove') {
-            print "Moving charactor sprite in view\n" if $self->GDEBUG;
-            $self->clear();
-            $self->draw_scene() if ($self->{grid} && $self->{grid});
-            $self->app->sync();
-        }
-    }
-
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input
     #now
+    return if !defined $event;
+
+    my %event_action = (
+        'Tick' => sub {
+            frame_rate(1) if $self->FPS;
+        },
+        'GridBuilt' => sub {
+            $self->{grid} = $event->{grid};
+        },
+        'GameStart' => sub {
+            $self->{game} = $event->{game};
+            $self->draw_scene() if $self->{grid};
+            $self->app->sync();
+        },
+        'CharactorMove' => sub {
+            $self->clear();
+            $self->draw_scene() if ($self->{grid} && $self->{grid});
+            $self->app->sync();
+        },
+    );
+
+    my $action = $event_action{$event->{name}};
+    if (defined $action) {
+        print "Event $event->{name}\n" if $self->GDEBUG;
+        $action->();
+    }
+
 }
 
 1;

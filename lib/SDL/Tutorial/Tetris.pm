@@ -13,6 +13,8 @@ use Class::XSAccessor accessors => {
     FPS      => 'FPS',
 };
 
+our $VERSION = '0.01';
+
 # ...and those constants:
 sub ROTATE_C        { 0 }    # rotates blocks ClockWise
 sub ROTATE_CC       { 1 }    # rotates blocks CounterClockWise

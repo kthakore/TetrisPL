@@ -29,36 +29,37 @@ sub notify {
     $self->event->poll;    #get the first one
 
     my $event_type = $self->event->type;
-    $event_to_process = { name => 'Quit' }
-      if $event_type == SDL_QUIT;
-    if ($event_type == SDL_KEYDOWN
-        || (defined $self->{key} && $self->{key} =~ 'down'))
-    {
 
-        $self->{key} = $self->event->key_name
-          if !(defined $self->{key});
+    my $key = ( $event_type == SDL_KEYDOWN ) ? $self->event->key_name
+                                             : '';
 
-        my $key = $self->{key};
-        print $key. " pressed \n" if $self->KEYDEBUG;
+    $self->{key} = $key;
 
-        my %event_key = (
+    my %sdl_event = (
+        (SDL_QUIT)    => {
+            '' => { name => 'Quit' },
+        },
+        (SDL_KEYDOWN) => {
             'escape' => { name => 'Quit' },
             'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },
             'space'  => { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC },
             'down'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN },
             'left'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT },
             'right'  => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT },
-        );
+        }
+    );
 
-        $event_to_process = $event_key{$key} if defined $event_key{$key};
-    }
+    $event_to_process = $sdl_event{$event_type}{$key} if defined $sdl_event{$event_type};
+
     if ($event_type == SDL_KEYUP) {
         $self->{key} = undef;
     }
 
-    #lets send the new events to be process back the event manager
-    $self->evt_manager->post($event_to_process)
-      if defined $event_to_process;
+    if (defined $event_to_process) {
+        #print "SDL event type='$event_type', key='$key'\n";
+        $self->evt_manager->post($event_to_process);
+    }
+
     $event_to_process = undef;    #why the hell do I have to do this shouldn't it be destroied now?
 }
 

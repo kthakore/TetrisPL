@@ -23,11 +23,13 @@ sub notify {
     #so we can check input now
 
     my $event_to_process = undef;
+
     $self->event(SDL::Event->new);
     $self->event->pump;    #get events from SDL queue
     $self->event->poll;    #get the first one
+
     my $event_type = $self->event->type;
-    $event_to_process = SDL::Tutorial::Tetris::Event->new(name => 'Quit')
+    $event_to_process = { name => 'Quit' }
       if $event_type == SDL_QUIT;
     if ($event_type == SDL_KEYDOWN
         || (defined $self->{key} && $self->{key} =~ 'down'))
@@ -39,20 +41,16 @@ sub notify {
         my $key = $self->{key};
         print $key. " pressed \n" if $self->KEYDEBUG;
 
-        #This process the only keys we care about right now
-        #later on we will add more stuff
-        $event_to_process = { name => 'Quit' }
-          if $key =~ 'escape';
-        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->ROTATE_C }
-          if $key =~ 'up';
-        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC }
-          if $key =~ 'space';
-        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN }
-          if $key =~ 'down';
-        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT }
-          if $key =~ 'left';
-        $event_to_process = { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT }
-          if $key =~ 'right';
+        my %event_key = (
+            'escape' => { name => 'Quit' },
+            'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },
+            'space'  => { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC },
+            'down'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN },
+            'left'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT },
+            'right'  => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT },
+        );
+
+        $event_to_process = $event_key{$key} if defined $event_key{$key};
     }
     if ($event_type == SDL_KEYUP) {
         $self->{key} = undef;

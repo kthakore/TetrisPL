@@ -22,11 +22,15 @@ sub notify {
 
     print "Notify in CPU Spinner \n" if $self->EDEBUG;
 
-    if (defined $event && $event->{name} eq 'Quit') {
-        print "Stopping to pump ticks \n" if $self->EDEBUG;
+    my %event_action = (
+        'Quit' => sub { $self->{keep_going} = 0 },
+    );
 
-        #if we got a quit event that means we can stop running the game
-        $self->{keep_going} = 0;
+    if ( defined $event_action{ $event->{name} } ) {
+        print "Event: $event->{name}\n" if $self->EDEBUG;
+
+        # call the corresponding action
+        $event_action{ $event->{name} }->();
     }
 
     #if we did not have a tick event then some other controller needs to do

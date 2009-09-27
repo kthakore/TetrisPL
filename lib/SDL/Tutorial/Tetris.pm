@@ -26,3 +26,33 @@ sub play {
 1;
 
 __END__
+
+=head1 NAME
+
+SDL::Tutorial::Tetris - tetris game using SDL
+
+=head1 AUTHOR
+
+    Kartik Thakore
+    CPAN ID: KTHAKORE
+    kthakore@CPAN.org
+    http://yapgh.blogspot.com
+
+=head1 CONTRIBUTORS
+
+    Nelson Ferraz
+    CPAN ID: NFERRAZ
+    nferraz@gmail.com
+
+=head1 COPYRIGHT
+
+This program is free software; you can redistribute
+it and/or modify it under the same terms as Perl itself.
+
+The full text of the license can be found in the
+LICENSE file included with this module.
+
+
+=head1 SEE ALSO
+
+perl(1).

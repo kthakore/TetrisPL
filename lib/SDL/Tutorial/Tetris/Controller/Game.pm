@@ -1,5 +1,8 @@
 package SDL::Tutorial::Tetris::Controller::Game;
 
+use strict;
+use warnings;
+
 use base 'SDL::Tutorial::Tetris::Controller';
 
 use Class::XSAccessor accessors => { 
@@ -34,25 +37,27 @@ sub init {
 sub notify {
     my ($self, $event) = (@_);
 
+    return if $event->{name} eq 'GridBuilt';
+
     print "Notify in GAME \n" if $self->EDEBUG;
 
-    if ( defined $event and $event->{name} ne 'GridBuilt' ) { # XXX
-        if ($self->{state} == $STATE_PREPARING) {
-            print "Event " . $event->{name} . "caught to start Game  \n"
-              if $self->GDEBUG;
-            $self->_start;
-        }
-        if ($self->{state} == $STATE_RUNNING) {
+    my $state = $self->{state};
 
-            #lets grab those move requests events
-            if ($event->{name} eq 'CharactorMoveRequest') {
-                $self->_charactor_move_request($event);
-            }
-            if ($event->{name} eq 'Tick' and ((time - $self->{wait}) > $self->{level})) {
-                $self->_tick($event);
-            }
+    my %event_state = (
+        $STATE_PREPARING => {
+            '*' => '_start',
+        },
+        $STATE_RUNNING   => {
+            'CharactorMoveRequest' => '_charactor_move_request',
+            'Tick'                 => '_tick',
+        },
+    );
 
-        }
+    my $method = $event_state{$state}{$event->{name}} || $event_state{$state}{'*'};
+
+    if ( defined $method ) {
+        # call the event
+        $self->$method($event);
     }
 
     #if we did not have a tick event then some other controller needs to do
@@ -86,6 +91,8 @@ sub _charactor_move_request {
 
 sub _tick {
     my ($self, $event) = @_;
+
+    return if (time - $self->{wait}) < $self->{level};
 
     $self->{wait} = time;
 

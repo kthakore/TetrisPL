@@ -30,31 +30,30 @@ sub notify {
     $sdl_event->poll;    #get the first one
 
     my $event_type = $sdl_event->type;
+    my $key        = $self->{last_key} || $sdl_event->key_name;
 
-    my $key = ( $event_type == SDL_KEYDOWN )       ? $sdl_event->key_name
-                                                   : '';
+    if ( $key =~ /(down|left|right)/ ) {
+        $self->{last_key} = $key;
+    }
 
-    $self->{key} = $key;
-
-    my %sdl_event = (
-        (SDL_QUIT)    => {
-            '' => { name => 'Quit' },
-        },
-        (SDL_KEYDOWN) => {
-            'escape' => { name => 'Quit' },
-            'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },
-            'space'  => { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC },
-            'down'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN },
-            'left'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT },
-            'right'  => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT },
-        }
+    if ( $event_type == SDL_QUIT ) {
+        $key = 'escape';
+    }
+    elsif ($event_type == SDL_KEYUP) {
+        delete $self->{last_key};
+        $key = '';
+    }
+   
+    my %event_key = (
+        'escape' => { name => 'Quit' },
+        'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },
+        'space'  => { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC },
+        'down'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN },
+        'left'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT },
+        'right'  => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT },
     );
 
-    $event_to_process = $sdl_event{$event_type}{$key} if defined $sdl_event{$event_type};
-
-    if ($event_type == SDL_KEYUP) {
-        $self->{key} = undef;
-    }
+    $event_to_process = $event_key{$key} if defined $event_key{$key};
 
     if (defined $event_to_process) {
         #print "SDL event type='$event_type', key='$key'\n";

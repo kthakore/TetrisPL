@@ -32,7 +32,7 @@ sub notify {
     my $event_type = $sdl_event->type;
     my $key        = $self->{last_key} || $sdl_event->key_name;
 
-    if ( $key =~ /(down|left|right)/ ) {
+    if ( $key eq 'down' ) { # TODO: left, right
         # store last pressed key, so the blocks 
         # will continue sliding next time
         $self->{last_key} = $key;

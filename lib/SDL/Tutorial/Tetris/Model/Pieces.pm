@@ -295,3 +295,42 @@ sub random {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+SDL::Tutorial::Tetris::Model::Pieces - the tetris pieces
+
+=head1 SYNOPSIS
+
+    use SDL::Tutorial::Tetris::Model::Pieces;
+
+    my ($piece, $rotation) = SDL::Tutorial::Tetris::Model::Pieces->random();
+    my ($init_x, $init_y)  = SDL::Tutorial::Tetris::Model::Pieces->init_xy($piece,$rotation);
+
+    for my $y (0..4) {
+        for my $x (0..4) {
+            print SDL::Tutorial::Tetris::Model::Pieces->block_color($piece,$rotation,$x,$y);
+        }
+        print "\n";
+    }
+
+=head1 DESCRIPTION
+
+This modules holds the game data, and the means to interact to it.
+
+Basically, we have a set of named pieces (SQUARE, LINE, T_SHAPE; 
+L_SHAPE, N_SHAPE; L_SHAPE_MIRROR, N_SHAPE_MIRROR).
+
+=head2 random
+
+Returns a random piece and rotation.
+
+=head2 init_xy
+
+Returns the initial (x,y) coordinates for each block and rotation.
+
+=head2 block_color
+
+Given a block, rotation, and (x,y) coordinates, it returns the
+color of the block in that point.

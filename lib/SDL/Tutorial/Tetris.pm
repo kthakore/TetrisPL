@@ -6,6 +6,8 @@ use SDL::Tutorial::Tetris::Controller::Keyboard;
 use SDL::Tutorial::Tetris::Controller::CPUSpinner;
 use SDL::Tutorial::Tetris::Controller::Game;
 
+our $VERSION = 0.015;
+
 sub play {
     my ($class, $EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @_;
 
@@ -25,11 +27,21 @@ sub play {
 
 1;
 
+package main;
+use SDL::Tutorial::Tetris;
+SDL::Tutorial::Tetris->play(@ARGV);
+exit;
+1;
 __END__
+
 
 =head1 NAME
 
 SDL::Tutorial::Tetris - tetris game using SDL
+
+=head1 USAGE
+
+	perl -MSDL::Tutorial::Tetris
 
 =head1 AUTHOR
 
@@ -55,4 +67,4 @@ LICENSE file included with this module.
 
 =head1 SEE ALSO
 
-perl(1).
+perl(1), SDL(1).

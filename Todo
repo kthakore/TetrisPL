@@ -1,7 +1,2 @@
-TODO list for Perl module SDL::Tutorial::Tetris
-
-- Make MVC structure
-- Use SDL events
-- Use SDL 
-
-
+- Fix perl -MSDL::Tutorial::Tetris
+- Fixk Keyboard Controller (Redesign)

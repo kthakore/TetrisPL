@@ -1,6 +1,11 @@
 Revision history for Perl module SDL::Tutorial::Tetris
 
+0.01 Sun Sep 27 09:32:22 2009
+	- Quick Test fix
+	- Updated README
+
 0.01 Mon Sep 14 11:46:31 2009
 	- First version
-	- Works
+	- Works so far
+	
 

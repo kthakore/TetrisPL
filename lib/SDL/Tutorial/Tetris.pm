@@ -25,12 +25,10 @@ sub play {
     $spinner->run;
 }
 
-1;
+if (!caller) {
+    SDL::Tutorial::Tetris->play(@ARGV);
+}
 
-package main;
-use SDL::Tutorial::Tetris;
-SDL::Tutorial::Tetris->play(@ARGV);
-exit;
 1;
 __END__
 

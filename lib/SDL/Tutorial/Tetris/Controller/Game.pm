@@ -70,21 +70,23 @@ sub _charactor_move_request {
 
     print "Move charactor sprite \n" if $self->GDEBUG;
     my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
-    if ($event->{direction} == $self->ROTATE_C) {
-        $rot++;
-        $rot = $rot % 4;
+
+    my %action_direction = (
+        'ROTATE_C'        => sub { $rot++; $rot = $rot % 4; },
+        'ROTATE_CC'       => sub { $rot--; $rot = $rot % 4; },
+        'DIRECTION_DOWN'  => sub { $my++;                   },
+        'DIRECTION_LEFT'  => sub { $mx--;                   },
+        'DIRECTION_RIGHT' => sub { $mx++;                   },
+    );
+
+    my $action = $action_direction{ $event->{direction} };
+    if (defined $action) {
+        # do it
+        $action->();
     }
-    if ($event->{direction} == $self->ROTATE_CC) {
-        $rot--;
-        $rot = $rot % 4;
-    }
-    $my++ if ($event->{direction} == $self->DIRECTION_DOWN);
-    $mx-- if ($event->{direction} == $self->DIRECTION_LEFT);
-    $mx++ if ($event->{direction} == $self->DIRECTION_RIGHT);
 
     if ($self->grid->is_possible_movement($mx, $my, $self->{piece}, $rot)) {
         ($self->{posx}, $self->{posy}, $self->{pieceRotation}) = ($mx, $my, $rot);
-
         $self->evt_manager->post({name => 'CharactorMove'});
     }
 }

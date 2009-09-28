@@ -49,11 +49,11 @@ sub notify {
 
     my %event_key = (
         'escape' => { name => 'Quit' },
-        'up'     => { name => 'CharactorMoveRequest', direction => $self->ROTATE_C },
-        'space'  => { name => 'CharactorMoveRequest', direction => $self->ROTATE_CC },
-        'down'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_DOWN },
-        'left'   => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_LEFT },
-        'right'  => { name => 'CharactorMoveRequest', direction => $self->DIRECTION_RIGHT },
+        'up'     => { name => 'CharactorMoveRequest', direction => 'ROTATE_C' },
+        'space'  => { name => 'CharactorMoveRequest', direction => 'ROTATE_CC' },
+        'down'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_DOWN' },
+        'left'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_LEFT' },
+        'right'  => { name => 'CharactorMoveRequest', direction => 'DIRECTION_RIGHT' },
     );
 
     $event_to_process = $event_key{$key} if defined $event_key{$key};

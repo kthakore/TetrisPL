@@ -15,13 +15,6 @@ use Class::XSAccessor accessors => {
 
 our $VERSION = '0.01';
 
-# ...and those constants:
-sub ROTATE_C        { 0 }    # rotates blocks ClockWise
-sub ROTATE_CC       { 1 }    # rotates blocks CounterClockWise
-sub DIRECTION_DOWN  { 2 }    # Drops the block
-sub DIRECTION_LEFT  { 3 }    # move left
-sub DIRECTION_RIGHT { 4 }    # move right
-
 # all the classes will also inherit the evt_manager,
 # so we won't have to pass it around everywhere
 my $evt_manager = SDL::Tutorial::Tetris::EventManager->new();

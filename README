@@ -1,55 +1,19 @@
-  
 NAME
-    SDL::Tutorial::Tetris - Tutorial using SDL and MVC design to make Tetris
-
-SYNOPSIS
-
-    $ Tetris.pl       
-
-DEPENDENCIES
-    Class::XSAccessor
-    Readonly
-
-KEYS
-
-    Space Key    - Rotate
-    Up Arrow Key - Rotate the other way
-    Down Key     - Slide Piece Down
-    Left, Right  - Step Piece Left or Right
- 
-DESCRIPTION
-    Code to show MVC style game development with SDL Perl. If you do not
-    know what Tetris is ... I am sorry. Try wikipedia. This tutorial is
-    based of <sjbrown's Writing Games Tutorial>
+    SDL::Tutorial::Tetris - tetris game using SDL
 
 USAGE
-    There is a script called Tetris.PL.
-    Run that. It also takes arguments like this.
-
-    print all events
-     perl Tetris.pl 1 0 0 0 
-    print keypresses
-     perl Tetris.pl 0 1 0 0
-    print Game Status
-     perl Tetris.pl 0 0 1 0
-    print Frame per Seconds
-     perl Tetris.pl 0 0 0 1
-  
-    These arguments can be combined. 
-   
-BUGS
-    None yet.
-
-SUPPORT
-    Ask for help on #sdl on irc.perl.org. Try the mailing list
-    sdl-devel\@perl.org.
+            perl -MSDL::Tutorial::Tetris
 
 AUTHOR
         Kartik Thakore
         CPAN ID: KTHAKORE
-        none
         kthakore@CPAN.org
         http://yapgh.blogspot.com
+
+CONTRIBUTORS
+        Nelson Ferraz
+        CPAN ID: NFERRAZ
+        nferraz@gmail.com
 
 COPYRIGHT
     This program is free software; you can redistribute it and/or modify it
@@ -59,5 +23,5 @@ COPYRIGHT
     with this module.
 
 SEE ALSO
-    perl(1) SDL(2).
+    perl(1), SDL(1).
 

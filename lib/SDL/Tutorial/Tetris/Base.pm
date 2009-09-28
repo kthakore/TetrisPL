@@ -5,6 +5,8 @@ use warnings;
 
 use SDL::Tutorial::Tetris::EventManager;
 
+use Carp;
+
 # all the classes inherit these basic accessors:
 use Class::XSAccessor accessors => {
     EDEBUG   => 'EDEBUG',

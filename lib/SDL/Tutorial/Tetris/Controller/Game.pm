@@ -14,7 +14,7 @@ use Time::HiRes qw/time/;
 use Readonly;
 
 use SDL::Tutorial::Tetris::Model::Grid;
-use SDL::Tutorial::Tetris::Model::Blocks;
+use SDL::Tutorial::Tetris::Model::Pieces;
 
 Readonly my $STATE_PREPARING => 0;
 Readonly my $STATE_RUNNING   => 1;
@@ -128,17 +128,15 @@ sub _start {
 sub _init_grid {
     my $self = shift;
     $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
-    $self->{piece}         = int(rand(7));    # 0 1 2 3 4 5 6 Pieces
-    $self->{pieceRotation} = int(rand(4));    # 0 1 2 3 rotations
-    $self->{posx} =
-      $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
-    $self->{posy} =
-      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
 
-    #     //  Next piece
-    $self->{next_piece}    = int(rand(7));
-    $self->{next_rotation} = int(rand(4));
+    ($self->{piece},$self->{rotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
+
+    my ($x,$y) = SDL::Tutorial::Tetris::Model::Pieces->init_xy($self->{piece}, $self->{pieceRotation});
+
+    $self->{posx} = $self->grid->{width} / 2 + $x;
+    $self->{posy} = $y;
+
+    ($self->{next_piece}, $self->{next_rotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
     $self->{next_posx}     = ($self->grid->{width}) + 1;
     $self->{next_posy}     = 0;
 }
@@ -147,15 +145,14 @@ sub _create_new_piece {
     my $self = shift;
     $self->{piece}         = $self->{next_piece};
     $self->{pieceRotation} = $self->{next_rotation};
-    $self->{posx} =
-      $self->grid->{width} / 2
-      + SDL::Tutorial::Tetris::Model::Blocks::get_x_init_pos($self->{piece}, $self->{pieceRotation});
-    $self->{posy} =
-      SDL::Tutorial::Tetris::Model::Blocks::get_y_init_pos($self->{piece}, $self->{pieceRotation});
+
+    my ($x,$y) = SDL::Tutorial::Tetris::Model::Pieces->init_xy($self->{piece}, $self->{pieceRotation});
+
+    $self->{posx} = $self->grid->{width} / 2 + $x;
+    $self->{posy} = $y;
 
     #     //  Next piece
-    $self->{next_piece}    = int(rand(7));
-    $self->{next_rotation} = int(rand(4));
+    ($self->{next_piece}, $self->{next_rotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
 }
 
 1;

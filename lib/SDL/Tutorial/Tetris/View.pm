@@ -9,7 +9,7 @@ use Class::XSAccessor accessors => {
     app => 'app'
 };
 
-use SDL::Tutorial::Tetris::Model::Blocks;
+use SDL::Tutorial::Tetris::Model::Pieces;
 
 use Data::Dumper;
 use SDL;
@@ -122,19 +122,20 @@ sub show_charactor    # peice
         for (my $j = 0; $j < 5; $j++) {
 
 #             // Get the type of the block and draw it with the correct color
-            my $type = SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j, $i);
-            if (defined $type) {
-                $piece_color = $palette[2] if ($type == 1);
-                $piece_color = $palette[3] if ($type == 2);
-            }
-            if ($type != 0) {
-                my $block_size = $self->{grid}->{block_size};
-                $self->draw_rectangle(
-                    $pixels_x + $i * $block_size,
-                    $pixels_y + $j * $block_size,
-                    $block_size - 1,
-                    $block_size - 1, $piece_color
-                );
+            my $color = SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j, $i);
+            if (defined $color) {
+                $piece_color = $palette[2] if ($color == 1);
+                $piece_color = $palette[3] if ($color == 2);
+
+                if ($color != 0) {
+                    my $block_size = $self->{grid}->{block_size};
+                    $self->draw_rectangle(
+                        $pixels_x + $i * $block_size,
+                        $pixels_y + $j * $block_size,
+                        $block_size - 1,
+                        $block_size - 1, $piece_color
+                    );
+                }
             }
         }
     }

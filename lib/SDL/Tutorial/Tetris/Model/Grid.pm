@@ -5,6 +5,7 @@ use warnings;
 
 use base 'SDL::Tutorial::Tetris::Base';
 
+use Carp;
 use Data::Dumper;
 
 use Class::XSAccessor accessors => {
@@ -12,7 +13,7 @@ use Class::XSAccessor accessors => {
     grid        => 'grid'
 };
 
-use SDL::Tutorial::Tetris::Model::Blocks;
+use SDL::Tutorial::Tetris::Model::Pieces;
 
 sub new {
     my ($class, %params) = (@_);
@@ -49,7 +50,7 @@ sub init {
 
 sub store_piece {
     my $self = shift;
-    die 'Expecting 4 parameters' if ($#_ != 3);
+    confess 'Expecting 4 parameters' if ($#_ != 3);
     my ($x, $y, $piece, $rotation) = @_;
 
     for (my $i1 = $x, my $i2 = 0; $i1 < $x + 5; $i1++, $i2++) {
@@ -57,7 +58,7 @@ sub store_piece {
             if (!($i1 < 0 || $j1 < 0)) {
                 $self->grid->[$i1][$j1] = 1
                   if (
-                    SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j2, $i2) != 0);
             }
         }
     }
@@ -105,7 +106,7 @@ sub delete_possible_lines {
 
 sub is_free_loc {
     my $self = shift;
-    die 'Expecting 2 parameters' if $#_ != 1;
+    confess 'Expecting 2 parameters' if $#_ != 1;
 
     #die 'got '.$_[0].' '.$_[1];
     my $grid = $self->grid();
@@ -118,7 +119,7 @@ sub is_free_loc {
 
 sub get_x_pos_in_pixels {
     my $self = shift;
-    die 'Expecting 1 parameter got ' . $_[0] if (!defined($_[0]));
+    confess 'Expecting 1 parameter got ' . $_[0] if (!defined($_[0]));
     return (
         (   $self->{board_position}
               - ($self->{block_size} * ($self->{width} / 2))
@@ -128,7 +129,7 @@ sub get_x_pos_in_pixels {
 
 sub get_y_pos_in_pixels {
     my $self = shift;
-    die 'Expecting 1 parameter got ' . $_[0] if (!defined($_[0]));
+    confess 'Expecting 1 parameter got ' . $_[0] if (!defined($_[0]));
     return (($self->{screen_height} - ($self->{block_size} * $self->{height}))
         + ($_[0] * $self->{block_size}));
 
@@ -136,7 +137,7 @@ sub get_y_pos_in_pixels {
 
 sub is_possible_movement {
     my $self = shift;
-    die 'Expecting 4 parameters' if $#_ != 3;
+    confess 'Expecting 4 parameters' if $#_ != 3;
     my ($x, $y, $piece, $rotation) = @_;
 
     for (my $i1 = $x, my $i2 = 0; $i1 < $x + 5; $i1++, $i2++) {
@@ -149,14 +150,14 @@ sub is_possible_movement {
             {
                 return 0
                   if (
-                    SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0);
+                    SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j2, $i2) != 0);
             }
 
             #check collision with blocks already on board
             if ($j1 >= 0) {
                 return 0
                   if (
-                    (SDL::Tutorial::Tetris::Model::Blocks::get_block_type($piece, $rotation, $j2, $i2) != 0)
+                    (SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j2, $i2) != 0)
                     && !($self->is_free_loc($i1, $j1)));
             }
         }

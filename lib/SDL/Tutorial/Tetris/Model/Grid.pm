@@ -22,25 +22,26 @@ sub new {
 }
 
 sub init {
-    my $self = shift;
+    my ($self,%param) = @_;
 
-    #TODO: Get the following from @_
-    $self->{board_line_width} = 6;
-    $self->{block_size}       = 20;
-    $self->{board_position}   = 300;
-    $self->{screen_height}    = 480;
+    #TODO: Get the following from @_ (DONE!)
 
-    $self->{width}  = 10;
-    $self->{height} = 23;
-    my $arr_ref = [];
+    $self->{board_line_width} ||= 6;
+    $self->{block_size}       ||= 20;
+    $self->{board_position}   ||= 300;
+    $self->{screen_height}    ||= 480;
+
+    $self->{width}  ||= 10;
+    $self->{height} ||= 23;
 
     # used to test delete_line
+    # my $arr_ref = [];
     # for my $x (0..18)
     # {
     #		$arr_ref->[$x][19] = 1;
     #  }
 
-    $self->{grid} = $arr_ref;
+    $self->{grid} ||= [];
 }
 
 sub store_piece {

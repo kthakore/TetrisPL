@@ -22,7 +22,7 @@ sub new {
     # all controllers must register a listener
     $self->evt_manager->reg_listener($self);
 
-    $self->init() if $self->can('init');
+    $self->init(%params) if $self->can('init');
 
     return $self;
 }

@@ -7,14 +7,6 @@ use SDL::Tutorial::Tetris::EventManager;
 
 use Carp;
 
-# all the classes inherit these basic accessors:
-use Class::XSAccessor accessors => {
-    EDEBUG   => 'EDEBUG',
-    GDEBUG   => 'GDEBUG',
-    KEYDEBUG => 'KEYDEBUG',
-    FPS      => 'FPS',
-};
-
 our $VERSION = '0.01';
 
 # all the classes will also inherit the evt_manager,
@@ -47,10 +39,6 @@ SDL::Tutorial::Tetris::Base - base class
 
 This is the base class for most of the game objects. We put in this class
 all the information that we want to be visible across the game:
-
-=head2 Constants
-
-=head2 Debug properties
 
 =head2 Event Manager
 

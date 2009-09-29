@@ -170,7 +170,7 @@ sub is_possible_movement {
 sub notify {
     my ($self, $event) = (@_);
 
-    print "Notify in Grid \n" if $self->EDEBUG;
+    print "Notify in Grid \n" if $self->{EDEBUG};
 
     if (defined $event && $event->{name} eq 'Tick') {
         #do checks

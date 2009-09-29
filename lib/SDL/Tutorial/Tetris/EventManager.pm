@@ -44,11 +44,11 @@ sub post {
     my $self = shift;
     my $event = shift;
 
-    #print 'Event' . $event->{name} . "notified\n" if $self->EDEBUG;
+    #print 'Event' . $event->{name} . "notified\n" if $self->{EDEBUG};
 
     die "Post needs a Event as parameter" unless defined $event->{name};
 
-#print 'Event' . $event->{name} ." called \n" if (!$event->isa('SDL::Tutorial::Tetris::Event::Tick') && $self->EFDEBUG);
+#print 'Event' . $event->{name} ." called \n" if (!$event->isa('SDL::Tutorial::Tetris::Event::Tick') && $self->{EFDEBUG});
 
     foreach my $listener (values %{$self->listeners}) {
         $listener->notify($event);

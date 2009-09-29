@@ -26,7 +26,7 @@ sub init {
     $self->{level} = 0.5;
     $self->{state} = $STATE_PREPARING;
 
-    print "Game PREPARING ... \n" if $self->GDEBUG;
+    print "Game PREPARING ... \n" if $self->{GDEBUG};
 
     $self->_init_grid;
     $self->evt_manager->post({name => 'GridBuilt', grid => $self->grid});
@@ -39,7 +39,7 @@ sub notify {
 
     return if $event->{name} eq 'GridBuilt';
 
-    print "Notify in GAME \n" if $self->EDEBUG;
+    print "Notify in GAME \n" if $self->{EDEBUG};
 
     my $state = $self->{state};
 
@@ -68,7 +68,7 @@ sub notify {
 sub _charactor_move_request {
     my ($self, $event) = @_;
 
-    print "Move charactor sprite \n" if $self->GDEBUG;
+    print "Move charactor sprite \n" if $self->{GDEBUG};
     my ($mx, $my, $rot) = ($self->{posx}, $self->{posy}, $self->{pieceRotation});
 
     my %action_direction = (
@@ -120,7 +120,7 @@ sub _start {
     my $self = shift;
 
     $self->{state} = $STATE_RUNNING;
-    print "Game RUNNING \n" if $self->GDEBUG;
+    print "Game RUNNING \n" if $self->{GDEBUG};
     $self->evt_manager->post({ name => 'GameStart', game => $self });
     $self->{wait} = time;
 }

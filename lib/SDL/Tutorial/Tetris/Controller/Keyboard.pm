@@ -11,7 +11,7 @@ use SDL::Event;
 sub notify {
     my ($self, $event) = (@_);
 
-    print "Notify in C::KB \n" if $self->EDEBUG;
+    print "Notify in C::KB \n" if $self->{EDEBUG};
 
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input

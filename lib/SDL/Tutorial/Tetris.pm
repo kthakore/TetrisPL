@@ -9,16 +9,16 @@ use SDL::Tutorial::Tetris::Controller::Game;
 our $VERSION = 0.015;
 
 sub play {
-    my ($class, $EDEBUG, $KEYDEBUG, $GDEBUG, $FPS) = @_;
+    my ($class, ${EDEBUG}, ${KEYDEBUG}, ${GDEBUG}, $FPS) = @_;
 
     my $keybd    = SDL::Tutorial::Tetris::Controller::Keyboard->new();
     my $spinner  = SDL::Tutorial::Tetris::Controller::CPUSpinner->new();
     my $gameView = SDL::Tutorial::Tetris::View::Game->new();
 
     my $game     = SDL::Tutorial::Tetris::Controller::Game->new(
-        EDEBUG      => $EDEBUG,
-        GDEBUG      => $GDEBUG,
-        KEYDEBUG    => $KEYDEBUG,
+        EDEBUG      => ${EDEBUG},
+        GDEBUG      => ${GDEBUG},
+        KEYDEBUG    => ${KEYDEBUG},
         FPS         => $FPS,
     );
 

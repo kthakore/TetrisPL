@@ -43,7 +43,7 @@ sub init {
 sub notify {
     my ($self, $event) = (@_);
 
-    print "Notify in View Game \n" if $self->EDEBUG;
+    print "Notify in View Game \n" if $self->{EDEBUG};
 
     #if we did not have a tick event then some other controller needs to do
     #something so game state is still beign process we cannot have new input
@@ -52,7 +52,7 @@ sub notify {
 
     my %event_action = (
         'Tick' => sub {
-            frame_rate(1) if $self->FPS;
+            frame_rate(1) if $self->{FPS};
         },
         'GridBuilt' => sub {
             $self->{grid} = $event->{grid};
@@ -69,7 +69,7 @@ sub notify {
 
     my $action = $event_action{$event->{name}};
     if (defined $action) {
-        print "Event $event->{name}\n" if $self->GDEBUG;
+        print "Event $event->{name}\n" if $self->{GDEBUG};
         $action->();
     }
 

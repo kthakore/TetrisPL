@@ -16,14 +16,14 @@ use SDL;
 use SDL::App;
 
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
-our @palette = (
-    (SDL::Color->new(-r => 50,  -g => 50,  -b => 60)),
-    (SDL::Color->new(-r => 70,  -g => 191, -b => 247)),
-    (SDL::Color->new(-r => 0,   -g => 148, -b => 217)),
-    (SDL::Color->new(-r => 247, -g => 202, -b => 0)),
-    (SDL::Color->new(-r => 0,   -g => 214, -b => 46)),
-    (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
-    (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
+our %palette = (
+    background => (SDL::Color->new(-r => 50,  -g => 50,  -b => 60)),
+    unused     => (SDL::Color->new(-r => 70,  -g => 191, -b => 247)),
+    1          => (SDL::Color->new(-r => 0,   -g => 148, -b => 217)),
+    2          => (SDL::Color->new(-r => 247, -g => 202, -b => 0)),
+    lines      => (SDL::Color->new(-r => 0,   -g => 214, -b => 46)),
+    empty      => (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
+    full       => (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
 );
 
 sub init {
@@ -43,7 +43,7 @@ sub init {
 sub clear {
     my $self = shift;
     $self->draw_rectangle(0, 0, $self->app->width, $self->app->height,
-        $palette[0]);
+        $palette{background});
 }
 
 sub show_grid {
@@ -61,7 +61,7 @@ sub show_grid {
         $y,
         $self->{grid}->{board_line_width},
         $self->app->height - 1,
-        $palette[3]
+        $palette{lines},
     );
 
 #
@@ -69,19 +69,19 @@ sub show_grid {
         $x2, $y,
         $self->{grid}->{board_line_width},
         $self->app->height - 1,
-        $palette[3]
+        $palette{lines},
     );
 
-    my $color = $palette[4];
+    my $color;
     for (my $i = 0; $i < ($self->{grid}->{width}); $i++) {
         for (my $j = 0; $j < $self->{grid}->{height}; $j++) {
 
 #             // Check if the block is filled, if so, draw it
             if (!$self->{grid}->is_free_loc($i, $j)) {
-                $color = $palette[5];
+                $color = $palette{empty};
             }
             else {
-                $color = $palette[6];
+                $color = $palette{full};
             }
             $self->draw_rectangle(
                 $self->{grid}->get_x_pos_in_pixels($i),
@@ -93,8 +93,6 @@ sub show_grid {
 
         }
     }
-
-
 }
 
 #needs the charactor now
@@ -102,7 +100,7 @@ sub show_charactor    # peice
 {
     my $self = shift;
     die 'Expecting 4 arguments' if ($#_ != 3);
-    my $piece_color = $palette[1];
+
     my ($x, $y, $piece, $rotation) = @_;
     my $pixels_x = $self->{grid}->get_x_pos_in_pixels($x);
     my $pixels_y = $self->{grid}->get_y_pos_in_pixels($y);
@@ -110,21 +108,17 @@ sub show_charactor    # peice
     for (my $i = 0; $i < 5; $i++) {
         for (my $j = 0; $j < 5; $j++) {
 
-#             // Get the type of the block and draw it with the correct color
+            # Get the type of the block and draw it with the correct color
             my $color = SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j, $i);
-            if (defined $color) {
-                $piece_color = $palette[2] if ($color == 1);
-                $piece_color = $palette[3] if ($color == 2);
-
-                if ($color != 0) {
-                    my $block_size = $self->{grid}->{block_size};
-                    $self->draw_rectangle(
-                        $pixels_x + $i * $block_size,
-                        $pixels_y + $j * $block_size,
-                        $block_size - 1,
-                        $block_size - 1, $piece_color
-                    );
-                }
+            if (defined $color and $palette{$color}) {
+                my $block_size = $self->{grid}->{block_size};
+                $self->draw_rectangle(
+                    $pixels_x + $i * $block_size,
+                    $pixels_y + $j * $block_size,
+                    $block_size - 1,
+                    $block_size - 1,
+                    $palette{$color},
+                );
             }
         }
     }

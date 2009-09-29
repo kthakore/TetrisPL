@@ -23,9 +23,14 @@ my $evt_manager = SDL::Tutorial::Tetris::EventManager->new();
 sub evt_manager { $evt_manager }
 
 sub new {
-    my ($class, %params) = @_;
+    my ($class, %params) = (@_);
 
-    my $self = bless ({%params}, ref ($class) || $class);
+    my $self = bless {%params}, $class;
+
+    # all controllers must register a listener
+    $self->evt_manager->reg_listener($self);
+
+    $self->init() if $self->can('init');
 
     return $self;
 }

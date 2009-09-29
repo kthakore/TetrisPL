@@ -26,17 +26,6 @@ our @palette = (
     (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
 );
 
-sub new {
-    my ($class, %params) = (@_);
-
-    my $self  = $class->SUPER::new(%params);
-
-    $self->evt_manager->reg_listener($self);
-    $self->init;
-
-    return $self;
-}
-
 sub init {
     my $self = shift;
     $self->app(

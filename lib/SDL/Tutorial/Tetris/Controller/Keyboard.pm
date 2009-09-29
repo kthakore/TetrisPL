@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Controller::Keyboard;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris::Controller';
+use base 'SDL::Tutorial::Tetris::Base';
 
 use SDL;
 use SDL::Event;

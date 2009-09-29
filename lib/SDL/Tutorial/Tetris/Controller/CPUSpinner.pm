@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Controller::CPUSpinner;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris::Controller';
+use base 'SDL::Tutorial::Tetris::Base';
 
 sub init {
     my $self = shift;

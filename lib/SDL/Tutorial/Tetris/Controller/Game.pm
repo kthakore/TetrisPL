@@ -3,7 +3,7 @@ package SDL::Tutorial::Tetris::Controller::Game;
 use strict;
 use warnings;
 
-use base 'SDL::Tutorial::Tetris::Controller';
+use base 'SDL::Tutorial::Tetris::Base';
 
 use Class::XSAccessor accessors => { 
     grid => 'grid'

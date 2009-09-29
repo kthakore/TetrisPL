@@ -22,8 +22,8 @@ our %palette = (
     1          => (SDL::Color->new(-r => 0,   -g => 148, -b => 217)),
     2          => (SDL::Color->new(-r => 247, -g => 202, -b => 0)),
     lines      => (SDL::Color->new(-r => 0,   -g => 214, -b => 46)),
-    empty      => (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
-    full       => (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
+    blocked    => (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
+    free       => (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
 );
 
 sub init {
@@ -38,6 +38,41 @@ sub init {
         )
     );
     $self->clear();
+}
+
+sub notify {
+    my ($self, $event) = (@_);
+
+    print "Notify in View Game \n" if $self->EDEBUG;
+
+    #if we did not have a tick event then some other controller needs to do
+    #something so game state is still beign process we cannot have new input
+    #now
+    return if !defined $event;
+
+    my %event_action = (
+        'Tick' => sub {
+            frame_rate(1) if $self->FPS;
+        },
+        'GridBuilt' => sub {
+            $self->{grid} = $event->{grid};
+        },
+        'GameStart' => sub {
+            $self->{game} = $event->{game};
+            $self->draw_scene() if $self->{grid};
+        },
+        'CharactorMove' => sub {
+            $self->clear();
+            $self->draw_scene() if ($self->{grid} && $self->{grid});
+        },
+    );
+
+    my $action = $event_action{$event->{name}};
+    if (defined $action) {
+        print "Event $event->{name}\n" if $self->GDEBUG;
+        $action->();
+    }
+
 }
 
 sub clear {
@@ -76,13 +111,10 @@ sub show_grid {
     for (my $i = 0; $i < ($self->{grid}->{width}); $i++) {
         for (my $j = 0; $j < $self->{grid}->{height}; $j++) {
 
-#             // Check if the block is filled, if so, draw it
-            if (!$self->{grid}->is_free_loc($i, $j)) {
-                $color = $palette{empty};
-            }
-            else {
-                $color = $palette{full};
-            }
+            # Check if the block is filled, if so, draw it
+            my $color = $self->{grid}->is_free_loc($i, $j) ? $palette{free}
+                                                           : $palette{blocked};
+
             $self->draw_rectangle(
                 $self->{grid}->get_x_pos_in_pixels($i),
                 $self->{grid}->get_y_pos_in_pixels($j),
@@ -138,6 +170,8 @@ sub draw_scene {
         $game->{next_posx},  $game->{next_posy},
         $game->{next_piece}, $game->{next_rotation}
     );
+
+    $self->app->sync();
 }
 
 sub draw_rectangle {
@@ -169,43 +203,6 @@ sub frame_rate {
         $time       = time;
     }
     return $fps;
-}
-
-sub notify {
-    my ($self, $event) = (@_);
-
-    print "Notify in View Game \n" if $self->EDEBUG;
-
-    #if we did not have a tick event then some other controller needs to do
-    #something so game state is still beign process we cannot have new input
-    #now
-    return if !defined $event;
-
-    my %event_action = (
-        'Tick' => sub {
-            frame_rate(1) if $self->FPS;
-        },
-        'GridBuilt' => sub {
-            $self->{grid} = $event->{grid};
-        },
-        'GameStart' => sub {
-            $self->{game} = $event->{game};
-            $self->draw_scene() if $self->{grid};
-            $self->app->sync();
-        },
-        'CharactorMove' => sub {
-            $self->clear();
-            $self->draw_scene() if ($self->{grid} && $self->{grid});
-            $self->app->sync();
-        },
-    );
-
-    my $action = $event_action{$event->{name}};
-    if (defined $action) {
-        print "Event $event->{name}\n" if $self->GDEBUG;
-        $action->();
-    }
-
 }
 
 1;

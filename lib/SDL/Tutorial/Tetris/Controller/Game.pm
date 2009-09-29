@@ -129,8 +129,7 @@ sub _init_grid {
     my $self = shift;
     $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
 
-    ($self->{piece},$self->{rotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
-
+    ($self->{piece},$self->{pieceRotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
     my ($x,$y) = SDL::Tutorial::Tetris::Model::Pieces->init_xy($self->{piece}, $self->{pieceRotation});
 
     $self->{posx} = $self->grid->{width} / 2 + $x;

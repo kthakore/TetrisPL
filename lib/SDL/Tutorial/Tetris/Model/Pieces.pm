@@ -265,32 +265,30 @@ my %pieces_init = (
 
 sub piece {
     my ($self, $piece, $rotation) = @_;
-    croak "Invalid piece '$piece'"       if !defined $pieces{$piece};
-    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation];
+    croak "Invalid piece '$piece'"       if !defined $pieces{$piece} or !defined $piece;
+    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation] or !defined $rotation;
     return $pieces{$piece}[$rotation];
 }
 
 sub init_xy {
     my ($self, $piece, $rotation) = @_;
-    croak "Invalid piece '$piece'"       if !defined $pieces{$piece};
-    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation];
+    croak "Invalid piece '$piece'"       if !defined $pieces{$piece} or !defined $piece;
+    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation] or !defined $rotation;
     return @{ $pieces_init{$piece}[$rotation] };
 }
 
 sub block_color {
     my ($self, $piece, $rotation, $x, $y) = @_;
-    croak "Invalid piece '$piece'"       if !defined $pieces{$piece};
-    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation];
-    croak "Invalid coordinates ($x,$y)"  if !defined $pieces{$piece}[$rotation][$x][$y];
+    croak "Invalid piece '$piece'"       if !defined $pieces{$piece} or !defined $piece;
+    croak "Invalid rotation '$rotation'" if !defined $pieces{$piece}[$rotation] or !defined $rotation;
+    croak "Invalid coordinates ($x,$y)"  if !defined $pieces{$piece}[$rotation][$x][$y] or (!defined $x or !defined $y);
     return $pieces{$piece}[$rotation][$x][$y];
 }
 
 sub random {
     my @pieces = keys %pieces;
-
     my $piece    = $pieces[ rand(@pieces) ];
     my $rotation = int(rand(4));
-
     return ($piece,$rotation);
 }
 

@@ -5,10 +5,6 @@ use warnings;
 
 use base 'SDL::Tutorial::Tetris::Base';
 
-use Class::XSAccessor accessors => {
-    app => 'app'
-};
-
 use SDL::Tutorial::Tetris::Model::Pieces;
 
 use Data::Dumper;
@@ -28,14 +24,12 @@ our %palette = (
 
 sub init {
     my $self = shift;
-    $self->app(
-        SDL::App->new(
-            -width  => 640,
-            -height => 480,
-            -depth  => 16,
-            -title  => 'Tetris',
-            -init   => SDL_INIT_VIDEO
-        )
+    $self->{app} = SDL::App->new(
+        -width  => 640,
+        -height => 480,
+        -depth  => 16,
+        -title  => 'Tetris',
+        -init   => SDL_INIT_VIDEO
     );
     $self->clear();
 }
@@ -77,7 +71,7 @@ sub notify {
 
 sub clear {
     my $self = shift;
-    $self->draw_rectangle(0, 0, $self->app->width, $self->app->height,
+    $self->draw_rectangle(0, 0, $self->{app}->width, $self->{app}->height,
         $palette{background});
 }
 
@@ -95,7 +89,7 @@ sub show_grid {
         $x1 - $self->{grid}->{board_line_width},
         $y,
         $self->{grid}->{board_line_width},
-        $self->app->height - 1,
+        $self->{app}->height - 1,
         $palette{lines},
     );
 
@@ -103,7 +97,7 @@ sub show_grid {
     $self->draw_rectangle(
         $x2, $y,
         $self->{grid}->{board_line_width},
-        $self->app->height - 1,
+        $self->{app}->height - 1,
         $palette{lines},
     );
 
@@ -171,7 +165,7 @@ sub draw_scene {
         $game->{next_piece}, $game->{next_rotation}
     );
 
-    $self->app->sync();
+    $self->{app}->sync();
 }
 
 sub draw_rectangle {
@@ -179,7 +173,7 @@ sub draw_rectangle {
     die 'Expecting 5 parameters got: ' . $#_ if ($#_ != 4);
     my ($x, $y, $w, $h, $color) = @_;
     my $box = SDL::Rect->new(-x => $x, -y => $y, -w => $w, -h => $h);
-    $self->app->fill($box, $color);
+    $self->{app}->fill($box, $color);
 
     #print "Drew rect at ( $x $y $w $h ) \n";
 }

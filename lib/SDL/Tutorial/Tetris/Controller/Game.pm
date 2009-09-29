@@ -5,10 +5,6 @@ use warnings;
 
 use base 'SDL::Tutorial::Tetris::Base';
 
-use Class::XSAccessor accessors => { 
-    grid => 'grid'
-};
-
 use Data::Dumper;
 use Time::HiRes qw/time/;
 use Readonly;
@@ -29,7 +25,7 @@ sub init {
     print "Game PREPARING ... \n" if $self->{GDEBUG};
 
     $self->_init_grid;
-    $self->evt_manager->post({name => 'GridBuilt', grid => $self->grid});
+    $self->evt_manager->post({name => 'GridBuilt', grid => $self->{grid}});
 
     #$self->{player} =; For points, level so on
 }
@@ -85,7 +81,7 @@ sub _charactor_move_request {
         $action->();
     }
 
-    if ($self->grid->is_possible_movement($mx, $my, $self->{piece}, $rot)) {
+    if ($self->{grid}->is_possible_movement($mx, $my, $self->{piece}, $rot)) {
         ($self->{posx}, $self->{posy}, $self->{pieceRotation}) = ($mx, $my, $rot);
         $self->evt_manager->post({name => 'CharactorMove'});
     }
@@ -98,17 +94,17 @@ sub _tick {
 
     $self->{wait} = time;
 
-    if ($self->grid->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation})) {
+    if ($self->{grid}->is_possible_movement($self->{posx}, $self->{posy} + 1, $self->{piece}, $self->{pieceRotation})) {
         $self->{posy}++;
         $self->evt_manager->post({name => 'CharactorMove'});
     }
     else {
 
-        $self->grid->store_piece($self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
+        $self->{grid}->store_piece($self->{posx}, $self->{posy}, $self->{piece}, $self->{pieceRotation});
         $self->_create_new_piece();
 
-        $self->{level} -= (0.01) * $self->grid->delete_possible_lines;
-        if ($self->grid->is_game_over()) {
+        $self->{level} -= (0.01) * $self->{grid}->delete_possible_lines;
+        if ($self->{grid}->is_game_over()) {
 
             #make GameOver
             $self->evt_manager->post({name => 'Quit'});
@@ -127,16 +123,16 @@ sub _start {
 
 sub _init_grid {
     my $self = shift;
-    $self->grid(SDL::Tutorial::Tetris::Model::Grid->new());
+    $self->{grid} = SDL::Tutorial::Tetris::Model::Grid->new();
 
     ($self->{piece},$self->{pieceRotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
     my ($x,$y) = SDL::Tutorial::Tetris::Model::Pieces->init_xy($self->{piece}, $self->{pieceRotation});
 
-    $self->{posx} = $self->grid->{width} / 2 + $x;
+    $self->{posx} = $self->{grid}->{width} / 2 + $x;
     $self->{posy} = $y;
 
     ($self->{next_piece}, $self->{next_rotation}) = SDL::Tutorial::Tetris::Model::Pieces->random();
-    $self->{next_posx}     = ($self->grid->{width}) + 1;
+    $self->{next_posx}     = ($self->{grid}->{width}) + 1;
     $self->{next_posy}     = 0;
 }
 
@@ -147,7 +143,7 @@ sub _create_new_piece {
 
     my ($x,$y) = SDL::Tutorial::Tetris::Model::Pieces->init_xy($self->{piece}, $self->{pieceRotation});
 
-    $self->{posx} = $self->grid->{width} / 2 + $x;
+    $self->{posx} = $self->{grid}->{width} / 2 + $x;
     $self->{posy} = $y;
 
     #     //  Next piece

@@ -8,11 +8,6 @@ use base 'SDL::Tutorial::Tetris::Base';
 use Carp;
 use Data::Dumper;
 
-use Class::XSAccessor accessors => {
-    blocks      => 'blocks',
-    grid        => 'grid'
-};
-
 use SDL::Tutorial::Tetris::Model::Pieces;
 
 sub new {
@@ -44,8 +39,8 @@ sub init {
     # {
     #		$arr_ref->[$x][19] = 1;
     #  }
-    $self->grid($arr_ref);
 
+    $self->{grid} = $arr_ref;
 }
 
 sub store_piece {
@@ -56,7 +51,7 @@ sub store_piece {
     for (my $i1 = $x, my $i2 = 0; $i1 < $x + 5; $i1++, $i2++) {
         for (my $j1 = $y, my $j2 = 0; $j1 < $y + 5; $j1++, $j2++) {
             if (!($i1 < 0 || $j1 < 0)) {
-                $self->grid->[$i1][$j1] = 1
+                $self->{grid}->[$i1][$j1] = 1
                   if (
                     SDL::Tutorial::Tetris::Model::Pieces->block_color($piece, $rotation, $j2, $i2) != 0);
             }
@@ -67,8 +62,8 @@ sub store_piece {
 sub is_game_over {
     my $self = shift;
     for (my $i = 0; $i < $self->{width}; $i++) {
-        if (defined $self->grid->[$i][0]) {
-            return 1 if ($self->grid->[$i][0] == 1);
+        if (defined $self->{grid}->[$i][0]) {
+            return 1 if ($self->{grid}->[$i][0] == 1);
         }
     }
     return 0;
@@ -81,7 +76,7 @@ sub delete_line {
     for (my $j = $dline; $j > 0; $j--) {
 
         for (my $i = 0; $i < $self->{width}; $i++) {
-            $self->grid->[$i][$j] = $self->grid->[$i][$j - 1];
+            $self->{grid}->[$i][$j] = $self->{grid}->[$i][$j - 1];
         }
     }
     return 1;
@@ -96,7 +91,7 @@ sub delete_possible_lines {
 
         my $i = 0;
         while ($i < $self->{width}) {
-            last if !(defined($self->grid->[$i][$j]));
+            last if !(defined($self->{grid}->[$i][$j]));
             $i++;
         }
         $deleted_lines += $self->delete_line($j) if $i == $self->{width};
@@ -109,7 +104,7 @@ sub is_free_loc {
     confess 'Expecting 2 parameters' if $#_ != 1;
 
     #die 'got '.$_[0].' '.$_[1];
-    my $grid = $self->grid();
+    my $grid = $self->{grid};
 
     #die Dumper $grid;
     return 1 if !defined($grid->[$_[0]][$_[1]]);

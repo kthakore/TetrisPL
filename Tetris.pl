@@ -1,9 +1,8 @@
-#!/usr/bin/perl
+#!perl
 
 use strict;
 use warnings;
 
-use lib './lib';
 
 use SDL::Tutorial::Tetris;
 

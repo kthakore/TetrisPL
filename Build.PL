@@ -9,5 +9,6 @@ Module::Build->new
 	      'SDL' => '2.2.2.17',
 	      'Readonly' => '1.03',
 	      'Class::XSAccessor' => '1.03'
-      }
+      },
+	script_files => 'Tetris.pl'
     )->create_build_script;

@@ -1,13 +1,12 @@
+Build
 Build.PL
 Changes
 lib/SDL/Tutorial/Tetris.pm
 lib/SDL/Tutorial/Tetris/Base.pm
-lib/SDL/Tutorial/Tetris/Controller.pm
 lib/SDL/Tutorial/Tetris/Controller/CPUSpinner.pm
 lib/SDL/Tutorial/Tetris/Controller/Game.pm
 lib/SDL/Tutorial/Tetris/Controller/Keyboard.pm
 lib/SDL/Tutorial/Tetris/EventManager.pm
-lib/SDL/Tutorial/Tetris/Model/Blocks.pm
 lib/SDL/Tutorial/Tetris/Model/Grid.pm
 lib/SDL/Tutorial/Tetris/Model/Pieces.pm
 lib/SDL/Tutorial/Tetris/View.pm
@@ -16,8 +15,6 @@ MANIFEST
 MANIFEST.SKIP
 META.yml
 README
-t/block-init.t
-t/block-type.t
 t/event-manager.t
 t/grid.t
 Tetris.pl

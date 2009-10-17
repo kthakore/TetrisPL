@@ -10,16 +10,18 @@ use SDL::Tutorial::Tetris::Model::Pieces;
 use Data::Dumper;
 use SDL;
 use SDL::App;
+use SDL::Color;
+use SDL::Rect;
 
 #http://www.colourlovers.com/palette/959495/Toothpaste_Face
 our %palette = (
-    background => (SDL::Color->new(-r => 50,  -g => 50,  -b => 60)),
-    unused     => (SDL::Color->new(-r => 70,  -g => 191, -b => 247)),
-    1          => (SDL::Color->new(-r => 0,   -g => 148, -b => 217)),
-    2          => (SDL::Color->new(-r => 247, -g => 202, -b => 0)),
-    lines      => (SDL::Color->new(-r => 0,   -g => 214, -b => 46)),
-    blocked    => (SDL::Color->new(-r => 237, -g => 0,   -b => 142)),
-    free       => (SDL::Color->new(-r => 50,  -g => 60,  -b => 50)),
+    background => (SDL::Color->new( 50,   50,   60)),
+    unused     => (SDL::Color->new( 70,   191,  247)),
+    1          => (SDL::Color->new( 0,    148,  217)),
+    2          => (SDL::Color->new( 247,  202,  0)),
+    lines      => (SDL::Color->new( 0,    214,  46)),
+    blocked    => (SDL::Color->new( 237,  0,    142)),
+    free       => (SDL::Color->new( 50,   60,   50)),
 );
 
 sub init {
@@ -29,7 +31,8 @@ sub init {
         -height => 480,
         -depth  => 16,
         -title  => 'Tetris',
-        -init   => SDL_INIT_VIDEO
+        -init   => SDL_INIT_VIDEO,
+	-flags  => SDL_FULLSCREEN,
     );
     $self->clear();
 }
@@ -71,7 +74,7 @@ sub notify {
 
 sub clear {
     my $self = shift;
-    $self->draw_rectangle(0, 0, $self->{app}->width, $self->{app}->height,
+    $self->draw_rectangle(0, 0, $self->{app}->w, $self->{app}->h,
         $palette{background});
 }
 
@@ -82,14 +85,14 @@ sub show_grid {
     my $x1 = $self->{grid}->get_x_pos_in_pixels(0);
     my $x2 = $self->{grid}->get_x_pos_in_pixels($self->{grid}->{width});
     my $y =
-      $self->{app}->height
+      $self->{app}->h
       - ($self->{grid}->{block_size} * $self->{grid}->{height});
 
     $self->draw_rectangle(
         $x1 - $self->{grid}->{board_line_width},
         $y,
         $self->{grid}->{board_line_width},
-        $self->{app}->height - 1,
+        $self->{app}->h - 1,
         $palette{lines},
     );
 
@@ -97,7 +100,7 @@ sub show_grid {
     $self->draw_rectangle(
         $x2, $y,
         $self->{grid}->{board_line_width},
-        $self->{app}->height - 1,
+        $self->{app}->h - 1,
         $palette{lines},
     );
 
@@ -172,9 +175,10 @@ sub draw_rectangle {
     my $self = shift;
     die 'Expecting 5 parameters got: ' . $#_ if ($#_ != 4);
     my ($x, $y, $w, $h, $color) = @_;
-    my $box = SDL::Rect->new(-x => $x, -y => $y, -w => $w, -h => $h);
-    $self->{app}->fill($box, $color);
-
+    my $box = SDL::Rect->new( $x,  $y,  $w,  $h);
+    #$self->{app}->fill($box, $color);
+    my $mapped_color =SDL::MapRGB( $self->{app}->format, $color->r, $color->g, $color->b);
+    SDL::FillRect($self->{app}, $box, $mapped_color);
     #print "Drew rect at ( $x $y $w $h ) \n";
 }
 

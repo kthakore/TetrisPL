@@ -7,6 +7,7 @@ use base 'SDL::Tutorial::Tetris::Base';
 
 use SDL;
 use SDL::Event;
+use SDL::Events;
 
 sub notify {
     my ($self, $event) = (@_);
@@ -26,11 +27,11 @@ sub notify {
 
     my $sdl_event = SDL::Event->new();
 
-    $sdl_event->pump;    #get events from SDL queue
-    $sdl_event->poll;    #get the first one
+    SDL::Events::pump_events();;    #get events from SDL queue
+    SDL::Events::poll_event($sdl_event);    #get the first one
 
     my $event_type = $sdl_event->type;
-    my $key        = $self->{last_key} || $sdl_event->key_name;
+    my $key        = $self->{last_key} || SDL::Events::get_key_name($sdl_event->key_sym);
 
     if ( $key eq 'down' ) { # TODO: left, right
         # store last pressed key, so the blocks 

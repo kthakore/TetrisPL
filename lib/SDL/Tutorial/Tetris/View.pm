@@ -7,7 +7,6 @@ use base 'SDL::Tutorial::Tetris::Base';
 
 use SDL::Tutorial::Tetris::Model::Pieces;
 
-use Data::Dumper;
 use SDL;
 use SDL::App;
 use SDL::Color;
@@ -32,7 +31,6 @@ sub init {
         -depth  => 16,
         -title  => 'Tetris',
         -init   => SDL_INIT_VIDEO,
-	-flags  => SDL_FULLSCREEN,
     );
     $self->clear();
 }
@@ -177,8 +175,8 @@ sub draw_rectangle {
     my ($x, $y, $w, $h, $color) = @_;
     my $box = SDL::Rect->new( $x,  $y,  $w,  $h);
     #$self->{app}->fill($box, $color);
-    my $mapped_color =SDL::MapRGB( $self->{app}->format, $color->r, $color->g, $color->b);
-    SDL::FillRect($self->{app}, $box, $mapped_color);
+    my $mapped_color =SDL::Video::map_RGB( $self->{app}->format, $color->r, $color->g, $color->b);
+    SDL::Video::fill_rect($self->{app}, $box, $mapped_color);
     #print "Drew rect at ( $x $y $w $h ) \n";
 }
 

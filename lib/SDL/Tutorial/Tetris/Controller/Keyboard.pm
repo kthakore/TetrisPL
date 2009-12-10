@@ -10,61 +10,62 @@ use SDL::Event;
 use SDL::Events;
 
 sub notify {
-    my ($self, $event) = (@_);
+	my ($self, $event) = (@_);
 
-    print "Notify in C::KB \n" if $self->{EDEBUG};
+	print "Notify in C::KB \n" if $self->{EDEBUG};
 
-    #if we did not have a tick event then some other controller needs to do
-    #something so game state is still beign process we cannot have new input
-    #now
-    return if !defined $event or $event->{name} ne 'Tick';
+	#if we did not have a tick event then some other controller needs to do
+	#something so game state is still beign process we cannot have new input
+	#now
+	return if !defined $event or $event->{name} ne 'Tick';
 
-    #if we got a tick event that means we are starting
-    #a new iteration of game loop
-    #so we can check input now
+	#if we got a tick event that means we are starting
+	#a new iteration of game loop
+	#so we can check input now
 
-    my $event_to_process = undef;
+	my $event_to_process = undef;
 
-    my $sdl_event = SDL::Event->new();
+	my $sdl_event = SDL::Event->new();
 
-    SDL::Events::pump_events();;    #get events from SDL queue
-    SDL::Events::poll_event($sdl_event);    #get the first one
+	SDL::Events::pump_events();;    #get events from SDL queue
+	my $poll = SDL::Events::poll_event($sdl_event);    #get the first one
 
-    my $event_type = $sdl_event->type;
-    my $key        = $self->{last_key} || SDL::Events::get_key_name($sdl_event->key_sym);
+	my $event_type = $sdl_event->type;
+	my $key        = $self->{last_key} || SDL::Events::get_key_name($sdl_event->key_sym);
+	if( $poll >0 ) #check if we actually have an event
+	{
+		if ( $key eq 'down' ) { # TODO: left, right
+			# store last pressed key, so the blocks 
+			# will continue sliding next time
+			$self->{last_key} = $key;
+		}
 
-    if ( $key eq 'down' ) { # TODO: left, right
-        # store last pressed key, so the blocks 
-        # will continue sliding next time
-        $self->{last_key} = $key;
-    }
+		if ($event_type == SDL_KEYUP) {
+			# stop sliding on key up
+			delete $self->{last_key};
+			$key = '';
+		}
+		elsif ( $event_type == SDL_QUIT ) {
+			$key = 'escape';
+		}
+	}
+	my %event_key = (
+		'escape' => { name => 'Quit' },
+		'up'     => { name => 'CharactorMoveRequest', direction => 'ROTATE_C' },
+		'space'  => { name => 'CharactorMoveRequest', direction => 'ROTATE_CC' },
+		'down'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_DOWN' },
+		'left'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_LEFT' },
+		'right'  => { name => 'CharactorMoveRequest', direction => 'DIRECTION_RIGHT' },
+	);
 
-    if ($event_type == SDL_KEYUP) {
-        # stop sliding on key up
-        delete $self->{last_key};
-        $key = '';
-    }
-    elsif ( $event_type == SDL_QUIT ) {
-        $key = 'escape';
-    }
+	$event_to_process = $event_key{$key} if defined $event_key{$key};
 
-    my %event_key = (
-        'escape' => { name => 'Quit' },
-        'up'     => { name => 'CharactorMoveRequest', direction => 'ROTATE_C' },
-        'space'  => { name => 'CharactorMoveRequest', direction => 'ROTATE_CC' },
-        'down'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_DOWN' },
-        'left'   => { name => 'CharactorMoveRequest', direction => 'DIRECTION_LEFT' },
-        'right'  => { name => 'CharactorMoveRequest', direction => 'DIRECTION_RIGHT' },
-    );
+	if (defined $event_to_process) {
+		#print "SDL event type='$event_type', key='$key'\n";
+		$self->evt_manager->post($event_to_process);
+	}
 
-    $event_to_process = $event_key{$key} if defined $event_key{$key};
-
-    if (defined $event_to_process) {
-        #print "SDL event type='$event_type', key='$key'\n";
-        $self->evt_manager->post($event_to_process);
-    }
-
-    $event_to_process = undef;    #why the hell do I have to do this shouldn't it be destroied now?
+	$event_to_process = undef;    #why the hell do I have to do this shouldn't it be destroied now?
 }
 
 1;

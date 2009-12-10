@@ -1,0 +1,6 @@
+.git
+_build
+
+blib
+MANIFEST.bak
+.perltidyrc

@@ -1,0 +1,6 @@
+*.bak
+*.tar.gz
+_build/
+blib
+Build
+

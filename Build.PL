@@ -6,7 +6,7 @@ Module::Build->new
       license         => 'perl',
       requires 	=>
       {
-	      'SDL' => '2.2.2.17',
+	      'SDL' => '2.4',
 	      'Readonly' => '1.03',
 	      'Class::XSAccessor' => '1.03'
       },
